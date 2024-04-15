@@ -1,0 +1,10 @@
+# Build & intermediates
+build/
+cmake-build-debug/
+
+# Editors & IDEs
+.idea/
+
+# MacOS
+.DS_Store
+
