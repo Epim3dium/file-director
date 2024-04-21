@@ -1,6 +1,6 @@
 #include <string>
 #include <glad/glad.h>
-#include "Shader.h"
+#include "shader.h"
 
 Shader::Shader(const std::string &vertexSource, const std::string &fragmentSource) {
     unsigned int vertexShaderId = CreateShader(GL_VERTEX_SHADER, vertexSource);

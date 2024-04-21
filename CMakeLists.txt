@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.14)
-project(opengltriangle)
+project(file-director)
 
 set(CMAKE_CXX_STANDARD 17)
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
-add_executable(${PROJECT_NAME} src/main.cpp src/Shader.cpp src/Shader.h)
+add_executable(${PROJECT_NAME} 
+    src/main.cpp 
+    src/shader.cpp 
+    src/shader.h)
 
 set(GLAD_DIR "${LIB_DIR}/glad")
 add_library("glad" "${GLAD_DIR}/src/glad.c")

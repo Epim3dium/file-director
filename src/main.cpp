@@ -1,7 +1,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Shader.h"
+#include "shader.h"
 
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;

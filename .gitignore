@@ -1,9 +1,11 @@
 # Build & intermediates
 build/
 cmake-build-debug/
+lib/
 
 # Editors & IDEs
 .idea/
+.cache/
 
 # MacOS
 .DS_Store
