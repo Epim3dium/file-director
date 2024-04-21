@@ -1,22 +1,36 @@
 #include <iostream>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
+
+#include "glm/glm.hpp"
 #include "shader.h"
 
 const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 600;
+const unsigned int HEIGHT = 800;
 
-const unsigned int NUMBER_OF_VERTICES = 3;
+const unsigned int NUMBER_OF_VERTICES = 7;
 const unsigned int VERTEX_SIZE = 2;
 const float VERTICES[NUMBER_OF_VERTICES * VERTEX_SIZE] = {
-        -0.5f, -0.5f,
-        0.0f, 0.5f,
-        0.5f, -0.5f
+        0.0f, 0.0f,
+        -0.5f, 0.5f,
+        -0.2f, 0.5f,
+        -0.1f, 0.4f,
+        0.5f, 0.4f,
+        0.5f, -0.5f,
+        -0.5f, -0.5f
 };
 
-const unsigned int NUMBER_OF_INDICES = 3;
+const unsigned int TRIANGLE_COUNT = 6;
+const unsigned int NUMBER_OF_INDICES = 3 * TRIANGLE_COUNT;
 const unsigned int INDICES[NUMBER_OF_INDICES] = {
-        0, 1, 2
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 4,
+        0, 4, 5,
+        0, 5, 6,
+        0, 6, 1
 };
 
 void onKeyPressed(GLFWwindow *window, int key, int scanCode, int action, int mode) {
@@ -36,6 +50,8 @@ bool isGLError() {
 }
 
 int main() {
+	glm::mat4 P = glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f); //Compute projection matrix
+	glm::mat4 V = glm::lookAt(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //Compute view matrix
     std::cout << "Initializing GLFW" << std::endl;
     if (!glfwInit()) {
         fprintf(stderr, "Could not initialize GLFW\n");
@@ -88,38 +104,7 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(INDICES), INDICES, GL_STATIC_DRAW);
 
-    std::string vertexSource = R"(
-			#version 330 core
-
-			layout(location = 0) in vec3 in_position;
-
-			out Vertex {
-				vec4 color;
-			} out_vertex;
-
-			void main()
-			{
-				out_vertex.color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-				gl_Position = vec4(in_position, 1.0);
-			}
-		)";
-
-    std::string fragmentSource = R"(
-			#version 330 core
-
-			in Vertex {
-				vec4 color;
-			} in_vertex;
-
-			out vec4 out_color;
-
-			void main()
-			{
-				out_color = in_vertex.color;
-			}
-		)";
-        
-    Shader shader(vertexSource, fragmentSource);
+    Shader shader("../assets/v_basic.glsl", "../assets/f_basic.glsl");
     shader.Bind();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -127,7 +112,7 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDrawElements(GL_TRIANGLES, NUMBER_OF_INDICES, GL_UNSIGNED_INT, nullptr);
 
         if (isGLError()) {

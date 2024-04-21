@@ -1,5 +1,6 @@
 # Build & intermediates
 build/
+cgv_st_04_lin/
 cmake-build-debug/
 lib/
 

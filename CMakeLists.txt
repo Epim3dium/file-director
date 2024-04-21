@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(file-director)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
@@ -26,6 +27,13 @@ add_subdirectory("${GLFW_DIR}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_DIR}/include")
 target_link_libraries(${PROJECT_NAME} "glfw" "${GLFW_LIBRARIES}")
+
+set(GLM_BUILD_INSTALL ON CACHE INTERNAL "Generate installation target")
+set(GLM_DIR "${LIB_DIR}/glm")
+add_subdirectory("${GLM_DIR}")
+find_package(glm CONFIG REQUIRED)
+target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}")
+target_link_libraries(${PROJECT_NAME} "glm" glm::glm-header-only)
 
 if (APPLE)
     message(STATUS "Platform is Apple")

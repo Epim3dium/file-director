@@ -1,12 +1,28 @@
 #include <string>
 #include <glad/glad.h>
+#include <fstream>
+#include <sstream>
 #include "shader.h"
 
-Shader::Shader(const std::string &vertexSource, const std::string &fragmentSource) {
-    unsigned int vertexShaderId = CreateShader(GL_VERTEX_SHADER, vertexSource);
-    unsigned int fragmentShaderId = CreateShader(GL_FRAGMENT_SHADER, fragmentSource);
+std::string dumpStringFromFile(std::string filename) {
+    std::ifstream f(filename); //taking file as inputstream
+    std::string str;
+    if(f) {
+        std::ostringstream ss;
+        ss << f.rdbuf(); // reading data
+        str = ss.str();
+    }
+    return str;
+}
+
+Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile) {
+    auto vertexSource = dumpStringFromFile(vertexFile);
+    auto fragmentSource  = dumpStringFromFile(fragmentFile);
+    
+    unsigned int vertexShaderId = createShaderSource(GL_VERTEX_SHADER, vertexSource);
+    unsigned int fragmentShaderId = createShaderSource(GL_FRAGMENT_SHADER, fragmentSource);
     if (vertexShaderId != 0 && fragmentShaderId != 0) {
-        id = CreateProgram(vertexShaderId, fragmentShaderId);
+        id = createProgram(vertexShaderId, fragmentShaderId);
     } else {
         fprintf(stderr, "Could not create shader program\n");
     }
@@ -24,10 +40,10 @@ void Shader::Unbind() const {
     glUseProgram(0);
 }
 
-unsigned int Shader::CreateShader(unsigned int shaderType, const std::string &shaderSource) {
+unsigned int Shader::createShaderSource(unsigned int shaderType, const std::string &shaderSource) {
     unsigned int shaderId = glCreateShader(shaderType);
-    SetShaderSource(shaderId, shaderSource);
-    bool compiled = CompileShader(shaderId);
+    setShaderSource(shaderId, shaderSource);
+    bool compiled = compileShader(shaderId);
     if (compiled) {
         return shaderId;
     } else {
@@ -36,14 +52,14 @@ unsigned int Shader::CreateShader(unsigned int shaderType, const std::string &sh
     }
 }
 
-void Shader::SetShaderSource(unsigned int shaderId, const std::string &shaderSource) {
+void Shader::setShaderSource(unsigned int shaderId, const std::string &shaderSource) {
     char *source = (char *) shaderSource.c_str();
     unsigned int count = 1;
     int *length = nullptr;
     glShaderSource(shaderId, count, &source, length);
 }
 
-bool Shader::CompileShader(unsigned int shaderId) {
+bool Shader::compileShader(unsigned int shaderId) {
     glCompileShader(shaderId);
     int status = 0;
     glGetShaderiv(shaderId, GL_COMPILE_STATUS, &status);
@@ -54,11 +70,11 @@ bool Shader::CompileShader(unsigned int shaderId) {
     return compiled;
 }
 
-unsigned int Shader::CreateProgram(unsigned int vertexShaderId, unsigned int fragmentShaderId) {
+unsigned int Shader::createProgram(unsigned int vertexShaderId, unsigned int fragmentShaderId) {
     unsigned int programId = glCreateProgram();
     glAttachShader(programId, vertexShaderId);
     glAttachShader(programId, fragmentShaderId);
-    bool linked = LinkProgram(programId);
+    bool linked = linkProgram(programId);
     if (linked) {
         glDetachShader(programId, vertexShaderId);
         glDetachShader(programId, fragmentShaderId);
@@ -71,7 +87,7 @@ unsigned int Shader::CreateProgram(unsigned int vertexShaderId, unsigned int fra
     }
 }
 
-bool Shader::LinkProgram(unsigned int programId) {
+bool Shader::linkProgram(unsigned int programId) {
     glLinkProgram(programId);
     int status = 0;
     glGetProgramiv(programId, GL_LINK_STATUS, (int *) &status);
