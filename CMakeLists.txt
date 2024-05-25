@@ -9,7 +9,13 @@ set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 add_executable(${PROJECT_NAME} 
     src/main.cpp 
+    src/vertex_buffer.cpp 
+    src/elements_buffer.cpp 
+    src/vertex_array.cpp 
     src/shader.cpp 
+    src/texture.cpp
+    src/stb.cpp
+    src/camera.cpp
     src/shader.h)
 
 set(GLAD_DIR "${LIB_DIR}/glad")
@@ -34,6 +40,8 @@ add_subdirectory("${GLM_DIR}")
 find_package(glm CONFIG REQUIRED)
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}")
 target_link_libraries(${PROJECT_NAME} "glm" glm::glm-header-only)
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}/stb")
 
 if (APPLE)
     message(STATUS "Platform is Apple")

@@ -1,17 +1,22 @@
 #pragma once
 
 #include <unordered_map>
+#include "defs.h"
 
 class Shader {
 private:
-    unsigned int id;
+    unsigned int id = -1;
 
 public:
     Shader(const std::string &vertexFile, const std::string &fragmentFile);
+    Shader() {}
+    void init(const std::string &vertexFile, const std::string &fragmentFile);
     ~Shader();
 
-    void Bind() const;
-    void Unbind() const;
+    void bind() const;
+    void unbind() const;
+    
+    GLuint u(const char* variableName);
 
 private:
     unsigned int createShaderSource(unsigned int shaderType, const std::string &shaderSource);

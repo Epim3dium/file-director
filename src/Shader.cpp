@@ -15,7 +15,8 @@ std::string dumpStringFromFile(std::string filename) {
     return str;
 }
 
-Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile) {
+void Shader::init(const std::string &vertexFile, const std::string &fragmentFile) {
+    assert(this->id == -1);
     auto vertexSource = dumpStringFromFile(vertexFile);
     auto fragmentSource  = dumpStringFromFile(fragmentFile);
     
@@ -27,16 +28,22 @@ Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile) {
         fprintf(stderr, "Could not create shader program\n");
     }
 }
+Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile) {
+    init(vertexFile, fragmentFile);
+}
+GLuint Shader::u(const char* variableName) {
+	return glGetUniformLocation(id,variableName);
+}
 
 Shader::~Shader() {
     glDeleteProgram(id);
 }
 
-void Shader::Bind() const {
+void Shader::bind() const {
     glUseProgram(id);
 }
 
-void Shader::Unbind() const {
+void Shader::unbind() const {
     glUseProgram(0);
 }
 
