@@ -7,10 +7,9 @@ class Shader {
 private:
     unsigned int id = -1;
 
+    void init(const std::string &vertexFile, const std::string &fragmentFile);
 public:
     Shader(const std::string &vertexFile, const std::string &fragmentFile);
-    Shader() {}
-    void init(const std::string &vertexFile, const std::string &fragmentFile);
     ~Shader();
 
     void bind() const;

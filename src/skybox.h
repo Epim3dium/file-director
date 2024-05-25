@@ -43,12 +43,7 @@ static const unsigned int skyboxIndices[] =
 class Skybox {
 private:
     static Shader& shader() {
-        static Shader shader;
-        static bool shaderUsed = false;
-        if(!shaderUsed) {
-            shader.init(SKYBOX_VERTEX_SHADER, SKYBOX_FRAGMENT_SHADER);
-            shaderUsed = true;
-        }
+        static Shader shader(SKYBOX_VERTEX_SHADER, SKYBOX_FRAGMENT_SHADER);
         return shader;
     }
     unsigned int skyboxVAO;
