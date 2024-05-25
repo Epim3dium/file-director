@@ -44,7 +44,6 @@ unsigned int skyboxIndices[] =
 	6, 2, 3
 };
 
-Folder folder;
 Shader spLambert;
 Shader spSkybox;
 Camera cam(WIDTH, HEIGHT, glm::vec3(0, 0, -5));
@@ -61,13 +60,6 @@ bool isGLError() {
         return true;
     }
     return false;
-}
-void drawFolder(glm::mat4 Mt) {
-    spLambert.bind();
-	glUniform4f(spLambert.u("color"), 0, 1, 0, 1);
-    glUniformMatrix4fv(spLambert.u("M"), 1, false, glm::value_ptr(Mt));
-    cam.exportMatrix(spLambert, "cam_mat");
-    folder.draw();
 }
 
 int main() {
@@ -110,11 +102,15 @@ int main() {
     glEnable(GL_DEPTH_TEST);  
 
 
-    folder.init();
+    // folder.init();
     spLambert.init("../assets/v_lambert.glsl", "../assets/f_lambert.glsl");
     spSkybox.init("../assets/v_skybox.glsl", "../assets/f_skybox.glsl");
+    
+    Folder folder;
+    
     spSkybox.bind();
 	glUniform1i(spSkybox.u("skybox"), 0);
+    
 
     unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -205,8 +201,13 @@ int main() {
 
         angle += 0.1f;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
 		glm::mat4 Mk = glm::rotate(glm::mat4(1.f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-        drawFolder(Mk);
+        spLambert.bind();
+        glUniform4f(spLambert.u("color"), 0, 1, 0, 1);
+        glUniformMatrix4fv(spLambert.u("M"), 1, false, glm::value_ptr(Mk));
+        // cam.exportMatrix(spLambert, "cam_mat");
+        folder.draw(spLambert, cam);
         
         glDepthFunc(GL_LEQUAL);
 
