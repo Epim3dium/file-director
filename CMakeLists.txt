@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
     src/stb.cpp
     src/camera.cpp
     src/mesh.cpp
+    src/skybox.cpp
     src/shader.h)
 
 set(GLAD_DIR "${LIB_DIR}/glad")

@@ -17,6 +17,7 @@ public:
     void unbind() const;
     
     GLuint u(const char* variableName);
+    GLuint a(const char* variableName);
 
 private:
     unsigned int createShaderSource(unsigned int shaderType, const std::string &shaderSource);

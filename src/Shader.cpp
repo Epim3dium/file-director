@@ -35,6 +35,10 @@ GLuint Shader::u(const char* variableName) {
 	return glGetUniformLocation(id,variableName);
 }
 
+GLuint Shader::a(const char* variableName) {
+	return glGetAttribLocation(id,variableName);
+}
+
 Shader::~Shader() {
     glDeleteProgram(id);
 }
