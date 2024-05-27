@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-void Mesh::draw(Shader& shader, Camera& cam) {
+void Mesh::draw(Shader& shader, Camera& cam, GLsizei count) {
     // Bind shader to be able to access uniforms
 	shader.bind();
 	VAO.bind();
@@ -23,8 +23,12 @@ void Mesh::draw(Shader& shader, Camera& cam) {
 	glUniform3f(shader.u("camPos"), cam.position.x, cam.position.y, cam.position.z);
 	cam.exportMatrix(shader, "camMatrix");
 
-	// Draw the actual mesh
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    if(count == 1) {
+        // Draw the actual mesh
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    }else {
+        glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, count);
+    }
 }
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& idxs, const std::vector<Texture>& texs) 
     : verticies(vertices), indices(idxs), textures(texs) {

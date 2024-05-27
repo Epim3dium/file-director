@@ -13,7 +13,7 @@ struct Mesh {
 
     VertexArray VAO;
 
-    void draw(Shader& shader, Camera& cam);
+    void draw(Shader& shader, Camera& cam, GLsizei count = 1);
 
     Mesh(const std::vector<Vertex>& verticies, const std::vector<GLuint>& indices, const std::vector<Texture>& textures); 
 };

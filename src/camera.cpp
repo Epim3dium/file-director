@@ -61,7 +61,7 @@ void Camera::processInput(GLFWwindow* window) {
             lastMousePos.x = mouseX;
             lastMousePos.y = mouseY;
 		}
-
+        
 		double mouseX;
 		double mouseY;
 		glfwGetCursorPos(window, &mouseX, &mouseY);
