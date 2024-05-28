@@ -6,6 +6,9 @@ uniform mat4 camMatrix;
 uniform vec3 camPos;
 uniform mat4 M;
 
+uniform float maxGrassLength = 1.f;
+uniform float maxLayer = 1.f;
+
 // Positions/Coordinates
 layout (location = 0) in vec3 aPos;
 // Normals (not necessarily normalized)
@@ -19,9 +22,12 @@ layout (location = 3) in vec2 aTex;
 
 out vec4 fColor;
 out vec2 fTex;
+out float fLayer;
 
 void main(void) {
-    gl_Position=camMatrix*M*vec4(aPos, 1);
+    fLayer = gl_InstanceID;
+    vec3 nv=aPos+(fLayer*maxGrassLength/maxLayer)*normalize(aNormal);
+    gl_Position=camMatrix*M*vec4(nv, 1);
     // mat4 G=mat4(inverse(transpose(mat3(M))));
     // vec4 n=normalize(V*G*normal);
     // float nl=clamp(dot(n,lightDir),0,1);

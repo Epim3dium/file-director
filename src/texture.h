@@ -16,9 +16,9 @@ public:
 	// Assigns a texture unit to a texture
 	void texUnit(Shader& shader, const char* uniform, GLuint unit);
 	// Binds a texture
-	void bind();
+	void bind() const;
 	// Unbinds a texture
-	void unbind();
+	void unbind() const;
 	// Deletes a texture
 	void remove();
 };
