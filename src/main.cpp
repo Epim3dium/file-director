@@ -79,50 +79,23 @@ public:
     void cleanup() override final {}
     Demo(int w, int h)
         : 
-            grass_texture("../assets/grass.jpg", "grass", 0),
-            grass_detail("../assets/grass_fur_copy.png", "detail", 1),
-            perlin("../assets/perlin_single.png", "noise", 2),
+            grass_texture("../assets/textures/grass.jpg", "grass", 0),
+            grass_detail("../assets/textures/grass_fur_copy.png", "detail", 1),
+            perlin("../assets/textures/perlin_single.png", "noise", 2),
             grass_plane({
                 Vertex({-PLANE_SIZE, 0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.5,  0}, {-PLANE_SIZE, -PLANE_SIZE}), 
                 Vertex({-PLANE_SIZE, 0, PLANE_SIZE},  {0, 1, 0}, {0, 0.75, 0}, {-PLANE_SIZE, PLANE_SIZE}),
                 Vertex({PLANE_SIZE,  0, PLANE_SIZE},  {0, 1, 0}, {0, 0.6,  0}, {PLANE_SIZE,  PLANE_SIZE}),
                 Vertex({PLANE_SIZE,  0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.9,  0}, {PLANE_SIZE,  -PLANE_SIZE})}, {0, 1, 2, 2, 3, 0}, {grass_texture, grass_detail, perlin}),
-            spDefault("../assets/v_default.glsl", "../assets/f_default.glsl"),
-            spGrass("../assets/v_grass.glsl", "../assets/f_grass.glsl"),
-            skybox("../assets/skybox"),
+            spDefault("../assets/shaders/v_default.glsl", "../assets/shaders/f_default.glsl"),
+            spGrass("../assets/shaders/v_grass.glsl", "../assets/shaders/f_grass.glsl"),
+            skybox("../assets/textures/skybox"),
             camera(WIDTH, HEIGHT, glm::vec3(0, 1, -5)), App(w, h) 
     {}
 };
 
-struct path_leaf_string
-{
-    std::string operator()(const std::filesystem::directory_entry& entry) const
-    {
-        return entry.path().string();
-    }
-};
- 
-std::vector<std::string> read_directory(const std::string& name)
-{
-    std::vector<std::string> v;
-    std::filesystem::path p(name);
-    std::filesystem::directory_iterator start(p);
-    std::filesystem::directory_iterator end;
-    std::transform(start, end, std::back_inserter(v), path_leaf_string());
-    return v;
-}
-
 int main(int argc, char** argv) {
     InputParser input(argc, argv);
-    std::cerr << std::filesystem::current_path() << ":\n";
-    for(auto str : read_directory(std::filesystem::current_path().string())) {
-        std::cerr << str << "\n";
-    }
-    
-    return 0;
-    if(argc == 2) {
-        
-    }
     Demo demo(WIDTH, HEIGHT);
     demo.run();
 
