@@ -26,5 +26,5 @@ struct Camera {
     void exportMatrix(Shader& shader, const char* uniform_name);
     void processInput(GLFWwindow* window);
     
-    Camera(int width, int height, vec3 pos);
+    Camera(int width, int height, vec3 pos, vec3 lookat = vec3(0, 0, 1));
 };

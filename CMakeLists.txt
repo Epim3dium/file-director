@@ -16,9 +16,11 @@ add_executable(${PROJECT_NAME}
     src/texture.cpp
     src/stb.cpp
     src/camera.cpp
+    src/font_renderer.cpp 
     src/mesh.cpp
     src/skybox.cpp
     src/shader.h)
+add_compile_definitions(FD_PROJECT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(GLAD_DIR "${LIB_DIR}/glad")
 add_library("glad" "${GLAD_DIR}/src/glad.c")

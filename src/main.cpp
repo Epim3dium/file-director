@@ -6,22 +6,28 @@
 #include "shader.h"
 #include "camera.h"
 #include "skybox.h"
-#include "folder.hpp"
+#include "file.hpp"
 #include "input_parser.hpp"
+
+#include "stb_image_write.h"
+#include "stb_truetype.h"
+#include "font_renderer.h"
+
 
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 800;
 
-#define PLANE_SIZE 100.f
+#define PLANE_SIZE 1000.f
 class Demo : public App {
 public:
     float time = 0; 
     
-    Folder folder;
+    File file;
     Skybox skybox;
     Shader spDefault;
     Shader spGrass;
     
+    FontRenderer font_renderer;
     glm::vec2 noise_offset;
     Texture perlin;
     Texture grass_texture;
@@ -29,9 +35,12 @@ public:
     Mesh grass_plane;
     
     Camera camera;
+    glm::mat4 Mk;
+#define SUN_POSITION glm::normalize(glm::vec3(3, 4, -10.2)) * 100000.f 
 
     float angle = 0.f;
     bool setup() override final {
+        file.setPath();
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         for(auto& tex : {perlin, grass_texture, grass_detail}) {
@@ -41,10 +50,11 @@ public:
             tex.unbind();
         }
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        Mk = glm::mat4(1);
+        Mk = glm::scale(Mk, {0.5, 0.5, 0.5});
+        Mk = glm::translate(Mk, {0, 0.5, 0});
+		// Mk = glm::rotate(Mk, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
         return true;
-        
-        spDefault.bind();
-        glUniform4f(spDefault.u("color"), 0, 1, 0, 1);
     }
     void update() override final  {
         time += 1.0/60.0;
@@ -54,20 +64,18 @@ public:
         angle += 0.1f;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-		glm::mat4 Mk = glm::rotate(glm::translate(vec3{0, 0.5, 0}), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
         
         spDefault.bind();
         glUniformMatrix4fv(spDefault.u("M"), 1, false, glm::value_ptr(Mk));
-        folder.draw(spDefault, camera);
+        file.draw(spDefault, camera);
         
         spGrass.bind();
-        Mk = mat4(1);
 
         const int maxLayer = 200;
-        glUniformMatrix4fv(spGrass.u("M"), 1, false, glm::value_ptr(Mk));
+        glUniformMatrix4fv(spGrass.u("M"), 1, false, glm::value_ptr(glm::mat4(1)));
         
-        noise_offset.x = cosf(time / M_PI / 5.f);
-        noise_offset.y = sinf(time / M_PI / 5.f);
+        noise_offset.x =  time / 10.f;
+        noise_offset.y =  time / 10.f;
         glUniform2f(spGrass.u("noiseOffset"), noise_offset.x, noise_offset.y);
         glUniform1f(spGrass.u("maxGrassLength"), 0.1f);
         glUniform1f(spGrass.u("maxLayer"), maxLayer);
@@ -79,18 +87,23 @@ public:
     void cleanup() override final {}
     Demo(int w, int h)
         : 
-            grass_texture("../assets/textures/grass.jpg", "grass", 0),
-            grass_detail("../assets/textures/grass_fur_copy.png", "detail", 1),
-            perlin("../assets/textures/perlin_single.png", "noise", 2),
+            font_renderer( FD_ASSET_DIR"/cmunrm.ttf", 512, 128, 64),
+            grass_texture(FD_TEXTURE_DIR"/grass.jpg", "grass", 2),
+            // grass_texture(font_renderer.generate("    XD", glm::vec3(1, 0, 0), 2)),
+            grass_detail(FD_TEXTURE_DIR"/grass_detail.png", "detail", 0),
+            perlin(FD_TEXTURE_DIR"/perlin_single.png", "noise", 1),
+            skybox(FD_TEXTURE_DIR"/skybox"),
+            
+            spDefault(FD_SHADER_DIR"/v_default.glsl", FD_SHADER_DIR"/f_default.glsl"),
+            spGrass(FD_SHADER_DIR"/v_grass.glsl", FD_SHADER_DIR"/f_grass.glsl"),
+            
             grass_plane({
                 Vertex({-PLANE_SIZE, 0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.5,  0}, {-PLANE_SIZE, -PLANE_SIZE}), 
                 Vertex({-PLANE_SIZE, 0, PLANE_SIZE},  {0, 1, 0}, {0, 0.75, 0}, {-PLANE_SIZE, PLANE_SIZE}),
-                Vertex({PLANE_SIZE,  0, PLANE_SIZE},  {0, 1, 0}, {0, 0.6,  0}, {PLANE_SIZE,  PLANE_SIZE}),
-                Vertex({PLANE_SIZE,  0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.9,  0}, {PLANE_SIZE,  -PLANE_SIZE})}, {0, 1, 2, 2, 3, 0}, {grass_texture, grass_detail, perlin}),
-            spDefault("../assets/shaders/v_default.glsl", "../assets/shaders/f_default.glsl"),
-            spGrass("../assets/shaders/v_grass.glsl", "../assets/shaders/f_grass.glsl"),
-            skybox("../assets/textures/skybox"),
-            camera(WIDTH, HEIGHT, glm::vec3(0, 1, -5)), App(w, h) 
+                Vertex({PLANE_SIZE,  0, PLANE_SIZE},  {0, 1, 0}, {0, 0.6,  0}, {PLANE_SIZE ,  PLANE_SIZE}),
+                Vertex({PLANE_SIZE,  0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.9,  0}, {PLANE_SIZE ,  -PLANE_SIZE})}, {0, 1, 2, 2, 3, 0}, {grass_texture, grass_detail, perlin}),
+            
+            camera(WIDTH, HEIGHT, glm::vec3(0, 1, -5), glm::vec3(0, 1, 1)), App(w, h) 
     {}
 };
 

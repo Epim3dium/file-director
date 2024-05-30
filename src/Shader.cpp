@@ -4,16 +4,6 @@
 #include <sstream>
 #include "shader.h"
 
-std::string dumpStringFromFile(std::string filename) {
-    std::ifstream f(filename); //taking file as inputstream
-    std::string str;
-    if(f) {
-        std::ostringstream ss;
-        ss << f.rdbuf(); // reading data
-        str = ss.str();
-    }
-    return str;
-}
 
 void Shader::init(const std::string &vertexFile, const std::string &fragmentFile) {
     assert(this->id == -1);

@@ -88,7 +88,8 @@ void Camera::processInput(GLFWwindow* window) {
 	}
 }
 
-Camera::Camera(int width, int height, vec3 pos) {
+Camera::Camera(int width, int height, vec3 pos, vec3 lookat) {
+    direction = glm::normalize(lookat - pos);
     window_size.width = width;
     window_size.height = height;
     position = pos;

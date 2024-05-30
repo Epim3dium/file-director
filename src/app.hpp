@@ -6,7 +6,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "skybox.h"
-#include "folder.hpp"
+#include "file.hpp"
 #include "glad/glad.h"
 
 const unsigned int DEFAULT_WIDTH = 800;

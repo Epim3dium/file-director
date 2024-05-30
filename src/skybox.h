@@ -38,8 +38,8 @@ static const unsigned int skyboxIndices[] =
 	3, 7, 6,
 	6, 2, 3
 };
-#define SKYBOX_VERTEX_SHADER "../assets/shaders/v_skybox.glsl"
-#define SKYBOX_FRAGMENT_SHADER "../assets/shaders/f_skybox.glsl"
+#define SKYBOX_VERTEX_SHADER FD_SHADER_DIR"/v_skybox.glsl"
+#define SKYBOX_FRAGMENT_SHADER FD_SHADER_DIR"/f_skybox.glsl"
 class Skybox {
 private:
     static Shader& shader() {

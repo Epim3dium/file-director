@@ -1,6 +1,10 @@
 #ifndef FD_DEFS
 #define FD_DEFS
 
+#define FD_ASSET_DIR FD_PROJECT_DIR"/assets"
+#define FD_TEXTURE_DIR FD_PROJECT_DIR"/assets/textures"
+#define FD_SHADER_DIR FD_PROJECT_DIR"/assets/shaders"
+
 #include "glad/glad.h"
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
@@ -15,6 +19,18 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-// #define STB_IMAGE_IMPLEMENTATION
+#include <fstream>
+#include <sstream>
+#include <string>
+inline static std::string dumpStringFromFile(std::string filename) {
+    std::ifstream f(filename); //taking file as inputstream
+    std::string str;
+    if(f) {
+        std::ostringstream ss;
+        ss << f.rdbuf(); // reading data
+        str = ss.str();
+    }
+    return str;
+}
 #include "stb_image.h"
 #endif

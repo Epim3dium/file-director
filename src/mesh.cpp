@@ -1,7 +1,10 @@
 #include "mesh.h"
 #include "elements_buffer.h"
+#include <iostream>
 #include <string>
+#include <assert.h>
 #include <unordered_map>
+#include <unordered_set>
 
 void Mesh::draw(Shader& shader, Camera& cam, GLsizei count) {
     // Bind shader to be able to access uniforms
@@ -10,13 +13,15 @@ void Mesh::draw(Shader& shader, Camera& cam, GLsizei count) {
 
 	// Keep track of how many of each type of textures we have
     std::unordered_map<std::string, unsigned int> tex_types_count;
+    // std::unordered_set<int> slots;
 
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
 		std::string type = textures[i].type;
         std::string num = std::to_string(tex_types_count[type]++);
-        
-		textures[i].texUnit(shader, (type + num).c_str(), i);
+        // assert(slots.find(textures[i].unit) == slots.end());
+		textures[i].texUnit(shader, (type + num).c_str());
+        // slots.insert(textures[i].unit);
 		textures[i].bind();
 	}
 	// Take care of the camera Matrix

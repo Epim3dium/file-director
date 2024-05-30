@@ -9,10 +9,9 @@
 #include "mesh.h"
 #include "shader.h"
 
-struct Model {
-    virtual void draw() {}
-};
-struct Folder : public Model {
+#include <filesystem>
+
+struct File  {
     static const unsigned int NUMBER_OF_VERTICES = 7;
     static const unsigned int VERTEX_SIZE = 3;
     const std::vector<Vertex> VERTICES = {
@@ -35,10 +34,15 @@ struct Folder : public Model {
             0, 6, 1
     };
     Mesh mesh;
+    std::filesystem::path myPath;
+    
     unsigned int vertexBufferId;
     unsigned int vertexArrayId;
     unsigned int indexBufferId;
-    Folder() : mesh(VERTICES, INDICES, {}) {
+    File() : mesh(VERTICES, INDICES, {}) {
+    }
+    void setPath(const std::filesystem::path& p = std::filesystem::current_path()) {
+        myPath = p;
     }
     void draw(Shader& shader, Camera& camera) {
         mesh.draw(shader, camera);

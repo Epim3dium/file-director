@@ -3,6 +3,7 @@
 
 #include"shader.h"
 #include "defs.h"
+#include <vector>
 
 class Texture
 {
@@ -12,9 +13,10 @@ public:
 	GLuint unit;
 
 	Texture(const char* image, const char* texType, GLuint slot);
+	Texture(unsigned char* bitmap, int width, int height, int numberOfChannels, const char* texType, GLuint slot);
 
 	// Assigns a texture unit to a texture
-	void texUnit(Shader& shader, const char* uniform, GLuint unit);
+	void texUnit(Shader& shader, const char* uniform);
 	// Binds a texture
 	void bind() const;
 	// Unbinds a texture
