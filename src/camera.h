@@ -12,7 +12,8 @@ struct Camera {
     float turn_speed = 0.2f;
     
     vec3 up = vec3(0, 1, 0);
-    mat4 mat = mat4(1);
+    mat4 V = mat4(1);
+    mat4 P = mat4(1);
 
     struct {
         int width;
@@ -23,7 +24,7 @@ struct Camera {
     glm::vec2 lastMousePos; 
 
     void update(float nearClip, float farClip, float fov);
-    void exportMatrix(Shader& shader, const char* uniform_name);
+    void exportMatrix(Shader& shader);
     void processInput(GLFWwindow* window);
     
     Camera(int width, int height, vec3 pos, vec3 lookat = vec3(0, 0, 1));

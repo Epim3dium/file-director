@@ -2,9 +2,10 @@
 #version 330
 
 //Uniform variables
-uniform mat4 camMatrix;
 uniform vec3 camPos;
 uniform mat4 M;
+uniform mat4 V;
+uniform mat4 P;
 
 uniform float maxGrassLength = 1.f;
 uniform float maxLayer = 1.f;
@@ -28,7 +29,7 @@ out float fDistance;
 void main(void) {
     fLayer = gl_InstanceID;
     vec3 nv=aPos+(fLayer*maxGrassLength/maxLayer)*normalize(aNormal);
-    gl_Position=camMatrix*M*vec4(nv, 1);
+    gl_Position=P*V*M*vec4(nv, 1);
     fDistance = gl_Position.z;
     // mat4 G=mat4(inverse(transpose(mat3(M))));
     // vec4 n=normalize(V*G*normal);

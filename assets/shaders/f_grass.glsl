@@ -17,7 +17,7 @@ in float fDistance;
 out vec4 pixelColor; 
 
 void main(void) {
-    if(fDistance > maxGrassingDistance && fLayer != 0) discard;
+    if(fDistance > maxGrassingDistance && fLayer != 0 && fLayer != maxLayer - 1) discard;
     float noiseX=texture(noise0,(fTex + noiseOffset.xy) * 0.1).x; 
     float noiseY=texture(noise0,(fTex + noiseOffset.yx) * 0.15).x; 
     
@@ -28,7 +28,7 @@ void main(void) {
     vec4 grassCol=texture(grass0,texCoord); 
     
     vec4 col=grassCol;
-    if (fLayer!=0) col=vec4(grassCol.rgb,grass.a);
+    if (fLayer!=0 && fDistance < maxGrassingDistance) col=vec4(grassCol.rgb,grass.a);
     if (grass.a==0 && fLayer!=0) discard;
     pixelColor=col; 
 }

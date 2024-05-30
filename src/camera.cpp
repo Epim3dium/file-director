@@ -3,14 +3,12 @@
 
 
 void Camera::update(float nearClip, float farClip, float fov) {
-    glm::mat4 V = glm::mat4(1.f);
-    glm::mat4 P = glm::mat4(1.f);
     V = glm::lookAt(position, position + direction, up);
     P = glm::perspective(fov, static_cast<float>(window_size.width) / static_cast<float>(window_size.height), nearClip, farClip);
-    mat = P * V;
 }
-void Camera::exportMatrix(Shader& shader, const char* uniform_name) {
-    glUniformMatrix4fv(shader.u(uniform_name), 1, GL_FALSE, glm::value_ptr(mat));
+void Camera::exportMatrix(Shader& shader) {
+    glUniformMatrix4fv(shader.u("V"), 1, GL_FALSE, glm::value_ptr(V));
+    glUniformMatrix4fv(shader.u("P"), 1, GL_FALSE, glm::value_ptr(P));
 }
 void Camera::processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)

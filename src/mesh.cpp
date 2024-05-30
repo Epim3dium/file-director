@@ -25,8 +25,7 @@ void Mesh::draw(Shader& shader, Camera& cam, GLsizei count) {
 		textures[i].bind();
 	}
 	// Take care of the camera Matrix
-	glUniform3f(shader.u("camPos"), cam.position.x, cam.position.y, cam.position.z);
-	cam.exportMatrix(shader, "camMatrix");
+	cam.exportMatrix(shader);
 
     if(count == 1) {
         // Draw the actual mesh

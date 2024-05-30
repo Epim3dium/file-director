@@ -22,12 +22,14 @@ class Demo : public App {
 public:
     float time = 0; 
     
-    File file;
     Skybox skybox;
     Shader spDefault;
     Shader spGrass;
+    Shader& spFile;
+    Shader spLambert;
     
     FontRenderer font_renderer;
+    File file;
     glm::vec2 noise_offset;
     Texture perlin;
     Texture grass_texture;
@@ -36,7 +38,7 @@ public:
     
     Camera camera;
     glm::mat4 Mk;
-#define SUN_POSITION glm::normalize(glm::vec3(3, 4, -10.2)) * 100000.f 
+#define SUN_POSITION (glm::normalize(glm::vec3(3, 4, -10.2)) * 100000.f)
 
     float angle = 0.f;
     bool setup() override final {
@@ -52,8 +54,12 @@ public:
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         Mk = glm::mat4(1);
         Mk = glm::scale(Mk, {0.5, 0.5, 0.5});
-        Mk = glm::translate(Mk, {0, 0.5, 0});
-		// Mk = glm::rotate(Mk, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+        Mk = glm::translate(Mk, {0, 1, 0});
+        spLambert.bind();
+        glUniform3f(spLambert.u("lightPos"), SUN_POSITION.x, SUN_POSITION.y, SUN_POSITION.z);
+        glUniform1f(spLambert.u("ambientLight"), 0.5f);
+        spLambert.unbind();
+        
         return true;
     }
     void update() override final  {
@@ -61,19 +67,18 @@ public:
         
         camera.processInput(window);
         camera.update(0.1f, 100.0f, glm::radians(45.f));
-        angle += 0.1f;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        
-        spDefault.bind();
-        glUniformMatrix4fv(spDefault.u("M"), 1, false, glm::value_ptr(Mk));
-        file.draw(spDefault, camera);
+		Mk = glm::rotate(Mk, glm::radians(0.3f), glm::vec3(0.0f, 1.0f, 0.0f));
+        spLambert.bind();
+        glUniformMatrix4fv(spLambert.u("M"), 1, false, glm::value_ptr(Mk));
+        file.draw(spLambert, camera);
         
         spGrass.bind();
 
+        
         const int maxLayer = 200;
         glUniformMatrix4fv(spGrass.u("M"), 1, false, glm::value_ptr(glm::mat4(1)));
-        
         noise_offset.x =  time / 10.f;
         noise_offset.y =  time / 10.f;
         glUniform2f(spGrass.u("noiseOffset"), noise_offset.x, noise_offset.y);
@@ -88,6 +93,7 @@ public:
     Demo(int w, int h)
         : 
             font_renderer( FD_ASSET_DIR"/cmunrm.ttf", 512, 128, 64),
+            file(font_renderer),
             grass_texture(FD_TEXTURE_DIR"/grass.jpg", "grass", 2),
             // grass_texture(font_renderer.generate("    XD", glm::vec3(1, 0, 0), 2)),
             grass_detail(FD_TEXTURE_DIR"/grass_detail.png", "detail", 0),
@@ -95,7 +101,9 @@ public:
             skybox(FD_TEXTURE_DIR"/skybox"),
             
             spDefault(FD_SHADER_DIR"/v_default.glsl", FD_SHADER_DIR"/f_default.glsl"),
+            spLambert(FD_SHADER_DIR"/v_lambert.glsl", FD_SHADER_DIR"/f_lambert.glsl"),
             spGrass(FD_SHADER_DIR"/v_grass.glsl", FD_SHADER_DIR"/f_grass.glsl"),
+            spFile(spLambert),
             
             grass_plane({
                 Vertex({-PLANE_SIZE, 0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.5,  0}, {-PLANE_SIZE, -PLANE_SIZE}), 
