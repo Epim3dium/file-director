@@ -15,12 +15,13 @@ FontRenderer::FontRenderer(const char* font, int width, int height, int line_hei
     scale = stbtt_ScaleForPixelHeight(&info, m_line_height);
     ascent = roundf(ascent * scale);
     descent = roundf(descent * scale);
+    std::cerr << ascent << "\n";
+    std::cerr << descent << "\n";
 }
 Texture FontRenderer::generate(std::string text, glm::vec3 color, GLuint slot) {
-    std::cerr << "generated: " << text << "\n";
     int x = 0;
     
-    std::vector<unsigned char> bitmap(m_width * m_height);
+    std::vector<unsigned char> bitmap(m_width * m_height );
     for (int i = 0; i < text.size(); ++i)
     {
         int ax;
@@ -41,5 +42,11 @@ Texture FontRenderer::generate(std::string text, glm::vec3 color, GLuint slot) {
         kern = stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]);
         x += roundf(kern * scale);
     }
-    return Texture(bitmap.data(), m_width, m_height, 1, "text", slot); 
+    std::vector<unsigned char> bitmap_colored(m_width * m_height*3);
+    for(int i = 0; i < bitmap.size(); i++) {
+        bitmap_colored[i*3 + 0] = bitmap[i] * color.r;
+        bitmap_colored[i*3 + 1] = bitmap[i] * color.g;
+        bitmap_colored[i*3 + 2] = bitmap[i] * color.b;
+    }
+    return Texture(bitmap_colored.data(), m_width, m_height, 3, "text", slot); 
 }

@@ -48,7 +48,7 @@ struct File  {
         {glm::vec3(1.0f,  -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2( 1.0f,-1.0f)}, //bottom-right
         {glm::vec3(-1.0f, -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(-1.0f,-1.0f)}, //bottom-left
     };
-#define TEXT_HEIGHT 0.4
+#define TEXT_HEIGHT 0.3
 #define TEXT_RATIO 32
     const std::vector<Vertex> TEXT_VERTICES = {
         {glm::vec3(-TEXT_HEIGHT*TEXT_RATIO/2, 1.1, 0), {}, {1, 0, 0}, glm::vec2(0, 1)},
@@ -96,21 +96,29 @@ struct File  {
             curpath.erase(curpath.find(home), home.size());
             // curpath = "~" + curpath;
         }
+        curpath = "0123456789012345678901234567890123456789";
         text_mesh = Mesh(TEXT_VERTICES, TEXT_INDICES, {fr.generate(curpath, {0, 1, 1}, 1)});
     }
     void setPath(const std::filesystem::path& p = std::filesystem::current_path()) {
         myPath = p;
     }
     void draw(Shader& folder_shader, Shader& text_shader, Camera& camera) {
-        glm::mat4 Mk = glm::mat4(1);
-        Mk = glm::scale(Mk, scale);
-        Mk = glm::translate(Mk, position);
-        Mk *= rotation;
-        folder_shader.bind();
-        glUniformMatrix4fv(folder_shader.u("M"), 1, 0, glm::value_ptr(Mk));
+        glm::mat4 Mf = glm::mat4(1);
+        
+        Mf = glm::translate(Mf, position);
+        Mf = Mf * rotation;
+        Mf = glm::scale(Mf, scale);
+        
+        auto Mt = Mf;
+        Mt = glm::scale(Mt, glm::vec3(1,-1,1));
+        
+        auto proj = glm::vec3(camera.position.x, position.y, camera.position.z);
+        Mt = Mt * glm::lookAt(glm::vec3(0, 0, 0), proj - position, -vec3(0, 1, 0));
+        
+        folder_shader.setUniformMatrix4fv("M", Mf);
         main_mesh.draw(folder_shader, camera);
-        text_shader.bind();
-        glUniformMatrix4fv(text_shader.u("M"), 1, 0, glm::value_ptr(Mk));
+
+        text_shader.setUniformMatrix4fv("M", Mt);
         text_mesh.draw(text_shader, camera);
     }
 };
