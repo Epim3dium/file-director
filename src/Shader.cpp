@@ -21,8 +21,40 @@ void Shader::init(const std::string &vertexFile, const std::string &fragmentFile
 Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile) {
     init(vertexFile, fragmentFile);
 }
+void Shader::setUniform1f(const char* var, float value) {
+    bind();
+    glUniform1f(u(var), value);
+    unbind();
+}
+void Shader::setUniform2f(const char* var, glm::vec2 value) {
+    bind();
+    glUniform2f(u(var), value.x, value.y);
+    unbind();
+}
+void Shader::setUniform3f(const char* var, glm::vec3 value) {
+    bind();
+    glUniform3f(u(var), value.x, value.y, value.z);
+    unbind();
+}
+void Shader::setUniform4f(const char* var, glm::vec4 value) {
+    bind();
+    glUniform4f(u(var), value.x, value.y, value.z, value.w);
+    unbind();
+}
+void Shader::setUniformMatrix3fv(const char* var, glm::mat3 value) {
+    bind();
+    glUniformMatrix3fv(u(var), 1, 0, glm::value_ptr(value));
+    unbind();
+}
+void Shader::setUniformMatrix4fv(const char* var, glm::mat4 value) {
+    bind();
+    glUniformMatrix4fv(u(var), 1, 0, glm::value_ptr(value));
+    unbind();
+}
 GLuint Shader::u(const char* variableName) {
+    bind();
 	return glGetUniformLocation(id,variableName);
+    unbind();
 }
 
 GLuint Shader::a(const char* variableName) {

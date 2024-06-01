@@ -53,11 +53,8 @@ public:
             tex.unbind();
         }
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        spLambert.bind();
-        glUniform3f(spLambert.u("lightPos"), SUN_POSITION.x, SUN_POSITION.y, SUN_POSITION.z);
-        glUniform1f(spLambert.u("ambientLight"), 0.5f);
-        spLambert.unbind();
-        
+        spLambert.setUniform3f("lightPos", SUN_POSITION);
+        spLambert.setUniform1f("ambientLight", 0.5f);
         return true;
     }
     void update() override final  {
@@ -74,14 +71,13 @@ public:
         // glUniformMatrix4fv(spText.u("M"), 1, false, glm::value_ptr(Mk));
         file.draw(spLambert, spText, camera);
         
-        spGrass.bind();
         const int maxLayer = 100;
-        glUniformMatrix4fv(spGrass.u("M"), 1, false, glm::value_ptr(glm::mat4(1)));
+        spGrass.setUniformMatrix4fv("M", glm::mat4(1));
         noise_offset.x =  time / 10.f;
         noise_offset.y =  time / 10.f;
-        glUniform2f(spGrass.u("noiseOffset"), noise_offset.x, noise_offset.y);
-        glUniform1f(spGrass.u("maxGrassLength"), 0.1f);
-        glUniform1f(spGrass.u("maxLayer"), maxLayer);
+        spGrass.setUniform2f("noiseOffset", noise_offset);
+        spGrass.setUniform1f("maxGrassLength", 0.1f);
+        spGrass.setUniform1f("maxLayer", maxLayer);
         
         grass_plane.draw(spGrass, camera, maxLayer);
         
@@ -91,7 +87,7 @@ public:
     Demo(int w, int h)
         : 
             font_renderer( FD_ASSET_DIR"/monospace.ttf", 1024, 32, 32),
-            file(glm::vec3(0, 0, 3), glm::vec3(0.5, 0.5, 0.5), glm::mat4(1), font_renderer),
+            file(glm::vec3(0, 1, 3), glm::vec3(0.5, 0.5, 0.5), glm::mat4(1), font_renderer),
             grass_texture(FD_TEXTURE_DIR"/grass.jpg", "grass", 2),
             // grass_texture(font_renderer.generate("    XD", glm::vec3(1, 0, 0), 2)),
             grass_detail(FD_TEXTURE_DIR"/grass_detail.png", "detail", 0),
