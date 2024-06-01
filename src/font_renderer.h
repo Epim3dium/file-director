@@ -8,16 +8,11 @@
 
 class FontRenderer
 {
-    int m_width, m_height, m_line_height;
-    float scale;
-    int ascent;
     stbtt_fontinfo info;
 public:
-	GLuint ID;
-	const char* type;
-	GLuint unit;
 
-	FontRenderer(const char* font, int width, int height, int line_height);
-    Texture generate(std::string text, glm::vec3 color, GLuint slot);
+	FontRenderer(const char* font);
+    Texture generate(std::string text, glm::vec3 color, int width, int height, GLuint slot, int font_height = 0);
+    int getPixelWidth(std::string text, int font_height);
 };
 #endif

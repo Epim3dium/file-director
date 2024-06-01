@@ -3,6 +3,8 @@
 
 Texture::Texture(unsigned char* bitmap, int widthImg, int heightImg, int numColCh, const char* texType, GLuint slot) {
 	type = texType;
+    m_width = widthImg;
+    m_height = heightImg;
 
 	glGenTextures(1, &ID);
 	glActiveTexture(GL_TEXTURE0 + slot);

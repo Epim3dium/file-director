@@ -86,7 +86,7 @@ public:
     void cleanup() override final {}
     Demo(int w, int h)
         : 
-            font_renderer( FD_ASSET_DIR"/monospace.ttf", 1024, 32, 32),
+            font_renderer( FD_ASSET_DIR"/monospace.ttf"),
             file(glm::vec3(0, 1, 5), glm::vec3(0.5, 0.5, 0.5), glm::mat4(1), font_renderer),
             grass_texture(FD_TEXTURE_DIR"/grass.jpg", "grass", 2),
             // grass_texture(font_renderer.generate("    XD", glm::vec3(1, 0, 0), 2)),

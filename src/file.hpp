@@ -23,6 +23,25 @@ struct File  {
 #endif
         return homedir;
     }
+    static inline std::pair<Texture, float> genTextTexture(FontRenderer& fr, std::string str, glm::vec3 color) {
+        constexpr float SCALE = 2.f;
+        constexpr float FONT_HEIGHT = 32.f * SCALE;
+        constexpr float FONT_WIDTH = 20.f * SCALE;
+
+        // int width = fr.getPixelWidth(str, FONT_HEIGHT) + 4 + 71;
+        int width = FONT_WIDTH * str.size();
+        double font_ratio = width / FONT_HEIGHT ;
+        return {fr.generate(str, color, width, FONT_HEIGHT , 1), font_ratio};
+    }
+    static inline std::vector<Vertex> genTextVerticies(float text_ratio, float text_height = 0.3) {
+        const std::vector<Vertex> TEXT_VERTICES = {
+            {glm::vec3(-text_height*text_ratio/2, 1.1, 0), {}, {1, 0, 0}, glm::vec2(0, 1)},
+            {glm::vec3( text_height*text_ratio/2, 1.1, 0) , {}, {1, 0, 0}, glm::vec2(1, 1)},
+            {glm::vec3( text_height*text_ratio/2, 1.1 + text_height, 0) , {}, {1, 0, 0}, glm::vec2(1, 0)},
+            {glm::vec3(-text_height*text_ratio/2, 1.1 + text_height, 0), {}, {1, 0, 0}, glm::vec2(0, 0)},
+        };
+        return TEXT_VERTICES;
+    }
     static std::filesystem::path startingAppPath() {
         static std::filesystem::path starting_path = std::filesystem::current_path();
         return starting_path; 
@@ -47,14 +66,6 @@ struct File  {
         {glm::vec3(1.0f,  0.8f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2( 1.0f, 0.8f)},  //top-right corner
         {glm::vec3(1.0f,  -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2( 1.0f,-1.0f)}, //bottom-right
         {glm::vec3(-1.0f, -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(-1.0f,-1.0f)}, //bottom-left
-    };
-#define TEXT_HEIGHT 0.3
-#define TEXT_RATIO 32
-    const std::vector<Vertex> TEXT_VERTICES = {
-        {glm::vec3(-TEXT_HEIGHT*TEXT_RATIO/2, 1.1, 0), {}, {1, 0, 0}, glm::vec2(0, 1)},
-        {glm::vec3( TEXT_HEIGHT*TEXT_RATIO/2, 1.1, 0) , {}, {1, 0, 0}, glm::vec2(1, 1)},
-        {glm::vec3( TEXT_HEIGHT*TEXT_RATIO/2, 1.1 + TEXT_HEIGHT, 0) , {}, {1, 0, 0}, glm::vec2(1, 0)},
-        {glm::vec3(-TEXT_HEIGHT*TEXT_RATIO/2, 1.1 + TEXT_HEIGHT, 0), {}, {1, 0, 0}, glm::vec2(0, 0)},
     };
     static const unsigned int TRIANGLE_COUNT = 6;
     static const unsigned int NUMBER_OF_INDICES = 3 * TRIANGLE_COUNT;
@@ -88,16 +99,16 @@ struct File  {
     File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr,
          std::filesystem::path path = std::filesystem::current_path())
         // : text_mesh({}, {}, {}), main_mesh(VERTICES, INDICES, {}), myPath(path) 
-        : position(pos), scale(scale), rotation(rot), text_mesh(TEXT_VERTICES, TEXT_INDICES, {}), main_mesh(VERTICES, INDICES, {}), myPath(path) 
+        : position(pos), scale(scale), rotation(rot), text_mesh({}, {}, {}), main_mesh(VERTICES, INDICES, {}), myPath(path) 
     {
         auto home = get_homedir();
         auto curpath = std::filesystem::current_path().string();
         if(curpath.find(home) != std::string::npos) {
             curpath.erase(curpath.find(home), home.size());
-            // curpath = "~" + curpath;
         }
-        curpath = "0123456789012345678901234567890123456789";
-        text_mesh = Mesh(TEXT_VERTICES, TEXT_INDICES, {fr.generate(curpath, {0, 1, 1}, 1)});
+        auto [tex, ratio] = genTextTexture(fr, curpath, vec3(1, 1, 1));
+        auto verts = genTextVerticies(ratio);
+        text_mesh = Mesh(verts, TEXT_INDICES, {tex});
     }
     void setPath(const std::filesystem::path& p = std::filesystem::current_path()) {
         myPath = p;

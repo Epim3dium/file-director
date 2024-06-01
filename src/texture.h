@@ -7,6 +7,7 @@
 
 class Texture
 {
+    int m_width, m_height;
 public:
 	GLuint ID;
 	const char* type;
