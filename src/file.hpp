@@ -13,6 +13,20 @@
 #include <filesystem>
 
 struct File  {
+    static inline std::string get_homedir(void) {
+        std::string homedir;
+#ifdef _WIN32
+        homedir = getenv("HOMEDRIVE");
+        homedir += getenv("HOMEPATH");
+#else
+        homedir = getenv("HOME");
+#endif
+        return homedir;
+    }
+    static std::filesystem::path startingAppPath() {
+        static std::filesystem::path starting_path = std::filesystem::current_path();
+        return starting_path; 
+    }
     static const unsigned int NUMBER_OF_VERTICES = 7;
     static const unsigned int VERTEX_SIZE = 3;
     const glm::vec3 FILE_COLOR = {1, 215.f / 255.f, 119.f / 255.f};
@@ -24,6 +38,7 @@ struct File  {
         {glm::vec3(1.0f,  0.8f,  0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2( 1.0f, 0.8f)},  //top-right corner
         {glm::vec3(1.0f,  -1.0f, 0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2( 1.0f,-1.0f)}, //bottom-right
         {glm::vec3(-1.0f, -1.0f, 0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(-1.0f,-1.0f)}, //bottom-left
+
         
         {glm::vec3(0.0f,  0.0f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2( 0.0f, 0.0f)},  //center
         {glm::vec3(-1.0f, 1.0f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(-1.0f, 1.0f)},  //top-left corner
@@ -33,11 +48,13 @@ struct File  {
         {glm::vec3(1.0f,  -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2( 1.0f,-1.0f)}, //bottom-right
         {glm::vec3(-1.0f, -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(-1.0f,-1.0f)}, //bottom-left
     };
+#define TEXT_HEIGHT 0.4
+#define TEXT_RATIO 32
     const std::vector<Vertex> TEXT_VERTICES = {
-        {glm::vec3(-1.1, 1.1, 0), {}, {1, 0, 0}},
-        {glm::vec3(1.1, 1.1, 0) , {}, {1, 0, 0}},
-        {glm::vec3(1.1, 1.5, 0) , {}, {1, 0, 0}},
-        {glm::vec3(-1.1, 1.5, 0), {}, {1, 0, 0}},
+        {glm::vec3(-TEXT_HEIGHT*TEXT_RATIO/2, 1.1, 0), {}, {1, 0, 0}, glm::vec2(0, 1)},
+        {glm::vec3( TEXT_HEIGHT*TEXT_RATIO/2, 1.1, 0) , {}, {1, 0, 0}, glm::vec2(1, 1)},
+        {glm::vec3( TEXT_HEIGHT*TEXT_RATIO/2, 1.1 + TEXT_HEIGHT, 0) , {}, {1, 0, 0}, glm::vec2(1, 0)},
+        {glm::vec3(-TEXT_HEIGHT*TEXT_RATIO/2, 1.1 + TEXT_HEIGHT, 0), {}, {1, 0, 0}, glm::vec2(0, 0)},
     };
     static const unsigned int TRIANGLE_COUNT = 6;
     static const unsigned int NUMBER_OF_INDICES = 3 * TRIANGLE_COUNT;
@@ -62,19 +79,38 @@ struct File  {
     };
     Mesh main_mesh;
     Mesh text_mesh;
-    std::filesystem::path myPath;
+    glm::vec3 position;
+    glm::vec3 scale;
+    glm::mat4 rotation = glm::mat4(1);
     
-    unsigned int vertexBufferId;
-    unsigned int vertexArrayId;
-    unsigned int indexBufferId;
-    File(FontRenderer &fr,
+    std::string myPath;
+    
+    File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr,
          std::filesystem::path path = std::filesystem::current_path())
-        : text_mesh(TEXT_VERTICES, TEXT_INDICES, {fr.generate(path.string(), {0, 1, 1}, 1)}), main_mesh(VERTICES, INDICES, {}), myPath(path) {}
+        // : text_mesh({}, {}, {}), main_mesh(VERTICES, INDICES, {}), myPath(path) 
+        : position(pos), scale(scale), rotation(rot), text_mesh(TEXT_VERTICES, TEXT_INDICES, {}), main_mesh(VERTICES, INDICES, {}), myPath(path) 
+    {
+        auto home = get_homedir();
+        auto curpath = std::filesystem::current_path().string();
+        if(curpath.find(home) != std::string::npos) {
+            curpath.erase(curpath.find(home), home.size());
+            // curpath = "~" + curpath;
+        }
+        text_mesh = Mesh(TEXT_VERTICES, TEXT_INDICES, {fr.generate(curpath, {0, 1, 1}, 1)});
+    }
     void setPath(const std::filesystem::path& p = std::filesystem::current_path()) {
         myPath = p;
     }
-    void draw(Shader& shader, Camera& camera) {
-        main_mesh.draw(shader, camera);
-        text_mesh.draw(shader, camera);
+    void draw(Shader& folder_shader, Shader& text_shader, Camera& camera) {
+        glm::mat4 Mk = glm::mat4(1);
+        Mk = glm::scale(Mk, scale);
+        Mk = glm::translate(Mk, position);
+        Mk *= rotation;
+        folder_shader.bind();
+        glUniformMatrix4fv(folder_shader.u("M"), 1, 0, glm::value_ptr(Mk));
+        main_mesh.draw(folder_shader, camera);
+        text_shader.bind();
+        glUniformMatrix4fv(text_shader.u("M"), 1, 0, glm::value_ptr(Mk));
+        text_mesh.draw(text_shader, camera);
     }
 };

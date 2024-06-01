@@ -25,8 +25,9 @@ public:
     Skybox skybox;
     Shader spDefault;
     Shader spGrass;
-    Shader& spFile;
     Shader spLambert;
+    Shader spFile;
+    Shader spText;
     
     FontRenderer font_renderer;
     File file;
@@ -52,9 +53,6 @@ public:
             tex.unbind();
         }
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        Mk = glm::mat4(1);
-        Mk = glm::scale(Mk, {0.5, 0.5, 0.5});
-        Mk = glm::translate(Mk, {0, 1, 0});
         spLambert.bind();
         glUniform3f(spLambert.u("lightPos"), SUN_POSITION.x, SUN_POSITION.y, SUN_POSITION.z);
         glUniform1f(spLambert.u("ambientLight"), 0.5f);
@@ -71,13 +69,13 @@ public:
         
 		Mk = glm::rotate(Mk, glm::radians(0.3f), glm::vec3(0.0f, 1.0f, 0.0f));
         spLambert.bind();
-        glUniformMatrix4fv(spLambert.u("M"), 1, false, glm::value_ptr(Mk));
-        file.draw(spLambert, camera);
+        // glUniformMatrix4fv(spLambert.u("M"), 1, false, glm::value_ptr(Mk));
+        spText.bind();
+        // glUniformMatrix4fv(spText.u("M"), 1, false, glm::value_ptr(Mk));
+        file.draw(spLambert, spText, camera);
         
         spGrass.bind();
-
-        
-        const int maxLayer = 200;
+        const int maxLayer = 100;
         glUniformMatrix4fv(spGrass.u("M"), 1, false, glm::value_ptr(glm::mat4(1)));
         noise_offset.x =  time / 10.f;
         noise_offset.y =  time / 10.f;
@@ -92,8 +90,8 @@ public:
     void cleanup() override final {}
     Demo(int w, int h)
         : 
-            font_renderer( FD_ASSET_DIR"/cmunrm.ttf", 512, 128, 64),
-            file(font_renderer),
+            font_renderer( FD_ASSET_DIR"/monospace.ttf", 1024, 32, 32),
+            file(glm::vec3(0, 0, 3), glm::vec3(0.5, 0.5, 0.5), glm::mat4(1), font_renderer),
             grass_texture(FD_TEXTURE_DIR"/grass.jpg", "grass", 2),
             // grass_texture(font_renderer.generate("    XD", glm::vec3(1, 0, 0), 2)),
             grass_detail(FD_TEXTURE_DIR"/grass_detail.png", "detail", 0),
@@ -101,6 +99,7 @@ public:
             skybox(FD_TEXTURE_DIR"/skybox"),
             
             spDefault(FD_SHADER_DIR"/v_default.glsl", FD_SHADER_DIR"/f_default.glsl"),
+            spText(FD_SHADER_DIR"/v_default_text.glsl", FD_SHADER_DIR"/f_default_text.glsl"),
             spLambert(FD_SHADER_DIR"/v_lambert.glsl", FD_SHADER_DIR"/f_lambert.glsl"),
             spGrass(FD_SHADER_DIR"/v_grass.glsl", FD_SHADER_DIR"/f_grass.glsl"),
             spFile(spLambert),

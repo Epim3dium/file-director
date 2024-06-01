@@ -1,5 +1,6 @@
 #include"font_renderer.h"
 #include "stb_truetype.h"
+#include <iostream>
 #include <vector>
 
 FontRenderer::FontRenderer(const char* font, int width, int height, int line_height) : m_width(width), m_height(height), m_line_height(line_height)
@@ -16,6 +17,7 @@ FontRenderer::FontRenderer(const char* font, int width, int height, int line_hei
     descent = roundf(descent * scale);
 }
 Texture FontRenderer::generate(std::string text, glm::vec3 color, GLuint slot) {
+    std::cerr << "generated: " << text << "\n";
     int x = 0;
     
     std::vector<unsigned char> bitmap(m_width * m_height);
