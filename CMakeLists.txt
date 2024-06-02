@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
     src/camera.cpp
     src/font_renderer.cpp 
     src/mesh.cpp
+    src/file.cpp
     src/skybox.cpp
     src/shader.h)
 add_compile_definitions(FD_PROJECT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")

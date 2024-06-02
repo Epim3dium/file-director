@@ -32,7 +32,7 @@ int FontRenderer::getPixelWidth(std::string text, int font_height) {
         //     x += roundf(kern * scale);
         // }
     }
-    return x;
+    return (x / font_height + 1) * font_height;
 }
 Texture FontRenderer::generate(std::string text, glm::vec3 color, int width, int height, GLuint slot, int font_height) {
     int ascent, descent, lineGap;
