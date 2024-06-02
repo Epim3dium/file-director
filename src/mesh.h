@@ -14,6 +14,9 @@ struct Mesh {
     VertexArray VAO;
 
     void draw(Shader& shader, Camera& cam, GLsizei count = 1);
+    void addTexture(const Texture& tex);
+    void removeTexture(unsigned int ID);
 
+    Mesh(std::string obj_filepath, const std::vector<Texture>& textures); 
     Mesh(const std::vector<Vertex>& verticies, const std::vector<GLuint>& indices, const std::vector<Texture>& textures); 
 };

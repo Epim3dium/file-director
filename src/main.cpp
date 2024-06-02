@@ -36,6 +36,7 @@ public:
     Texture grass_texture;
     Texture grass_detail;
     Mesh grass_plane;
+    Mesh teapot;
     
     Camera camera;
     glm::mat4 Mk;
@@ -69,6 +70,8 @@ public:
         spText.bind();
         // glUniformMatrix4fv(spText.u("M"), 1, false, glm::value_ptr(Mk));
         file.draw(spLambert, spText, camera);
+        spLambert.setUniformMatrix4fv("M", glm::scale(glm::translate(glm::vec3(0, 15, 10)), vec3(0.1, 0.1, 0.1)));
+        teapot.draw(spLambert, camera);
         
         const int maxLayer = 100;
         spGrass.setUniformMatrix4fv("M", glm::mat4(1));
@@ -99,6 +102,7 @@ public:
             spGrass(FD_SHADER_DIR"/v_grass.glsl", FD_SHADER_DIR"/f_grass.glsl"),
             spFile(spLambert),
             
+            teapot(FD_MODEL_DIR"/pilar.obj", {}),
             grass_plane({
                 Vertex({-PLANE_SIZE, 0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.5,  0}, {-PLANE_SIZE, -PLANE_SIZE}), 
                 Vertex({-PLANE_SIZE, 0, PLANE_SIZE},  {0, 1, 0}, {0, 0.75, 0}, {-PLANE_SIZE, PLANE_SIZE}),

@@ -2,6 +2,7 @@
 #define FD_DEFS
 
 #define FD_ASSET_DIR FD_PROJECT_DIR"/assets"
+#define FD_MODEL_DIR FD_PROJECT_DIR"/assets/models"
 #define FD_TEXTURE_DIR FD_PROJECT_DIR"/assets/textures"
 #define FD_SHADER_DIR FD_PROJECT_DIR"/assets/shaders"
 
