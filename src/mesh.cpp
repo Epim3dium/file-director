@@ -114,7 +114,8 @@ Mesh::Mesh(std::string obj_filepath, const std::vector<Texture>& textures)  {
                 
                 //if reading quads
                 if(i > 3) {
-                    std::cerr << "more than Quads not supported\n"; 
+                    // std::cerr << "more than Quads not supported\n"; 
+                    break;
                 }
                 else if(i == 3) {
                     size_t index0 = indices[indices.size() - 1];
