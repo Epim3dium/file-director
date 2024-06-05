@@ -1,7 +1,6 @@
 #version 330
 
 //Uniform variables
-uniform vec3 camPos;
 uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
@@ -18,6 +17,7 @@ layout (location = 3) in vec2 aTex;
 //varying variables
 
 out vec4 fColor;
+out vec2 fTex;
 
 void main(void) {
     gl_Position=P*V*M*vec4(aPos, 1);
@@ -25,4 +25,5 @@ void main(void) {
     // vec4 n=normalize(V*G*normal);
     // float nl=clamp(dot(n,lightDir),0,1);
     fColor=vec4(aColor, 1);
+    fTex = aTex;
 }

@@ -132,8 +132,6 @@ Mesh::Mesh(std::string obj_filepath, const std::vector<Texture>& textures)  {
             }
         }
     }
-    std::cerr << "vert: " << verticies.size() << "\n";
-    std::cerr << "idxs: " << indices.size() << "\n";
     *this = Mesh(verticies, indices, textures);
 }
 

@@ -1,8 +1,10 @@
+#include <iostream>
 #include <string>
 #include <glad/glad.h>
 #include <fstream>
 #include <sstream>
 #include "shader.h"
+#include <vector>
 
 
 void Shader::init(const std::string &vertexFile, const std::string &fragmentFile) {
@@ -96,9 +98,17 @@ bool Shader::compileShader(unsigned int shaderId) {
     glCompileShader(shaderId);
     int status = 0;
     glGetShaderiv(shaderId, GL_COMPILE_STATUS, &status);
-    bool compiled = status != 0;
+    bool compiled = status != GL_FALSE;
     if (!compiled) {
-        fprintf(stderr, "Could not compile shader\n");
+        GLint maxLength = 0;
+        glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &maxLength);
+
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(shaderId, maxLength, &maxLength, &errorLog[0]);
+        std::cerr << "Could not compile shader: ";
+        std::cerr << errorLog.data();
+
+        glDeleteShader(shaderId); // Don't leak the shader.
     }
     return compiled;
 }
