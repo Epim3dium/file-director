@@ -24,26 +24,33 @@ public:
     
     Skybox skybox;
     Shader spDefault;
-    Shader spExperimental;
+    Shader spBlinnPhong;
     Shader spGrass;
     Shader spLambert;
     Shader spFile;
     Shader spText;
     
     FontRenderer font_renderer;
+
     File file;
+
     glm::vec2 noise_offset;
     Texture perlin;
+
     Texture grass_texture;
     Texture grass_detail;
+    std::vector<Texture> column_textures;
+    std::vector<Texture> marble_textures;
+
+    Mesh plane;
     Mesh grass_plane;
     Mesh gun;
     Mesh column;
     
     Camera camera;
     glm::mat4 Mk;
-#define SUN_DIR (-glm::normalize(glm::vec3(3, 4, -10.2)))
-#define SUN_POSITION (glm::vec4(-SUN_DIR, 1) * 100000.f)
+#define SUN_DIR (glm::normalize(glm::vec3(3, 4, -10.2)))
+#define SUN_POSITION (SUN_DIR * 100000.f)
 
     float angle = 0.f;
     bool setup() override final {
@@ -56,11 +63,17 @@ public:
             tex.unbind();
         }
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        spExperimental.setUniform4f("light.position", glm::vec4(SUN_DIR, 0));
-        spExperimental.setUniform3f("light.color",    glm::vec3(1,   1,   1));
-        spExperimental.setUniform3f("light.specular", glm::vec3(1,   1,   1));
-        spExperimental.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
-        spExperimental.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
+        spBlinnPhong.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));
+        spBlinnPhong.setUniform3f("light.color",    glm::vec3(1,   1,   1));
+        spBlinnPhong.setUniform3f("light.specular", glm::vec3(1,   1,   1));
+        spBlinnPhong.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
+        spBlinnPhong.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
+        glm::vec4 fLight = glm::normalize(camera.V *glm::vec4(SUN_POSITION, 1) - camera.V * mat4(1) * glm::vec4(0, 0, 0, 1)); //vector towards the light in eye space
+        spLambert.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));
+        spLambert.setUniform3f("light.color",    glm::vec3(1,   1,   1));
+        spLambert.setUniform3f("light.specular", glm::vec3(1,   1,   1));
+        spLambert.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
+        spLambert.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
         return true;
     }
     void update() override final  {
@@ -71,13 +84,15 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
 		Mk = glm::rotate(Mk, glm::radians(0.3f), glm::vec3(0.0f, 1.0f, 0.0f));
-        spLambert.bind();
-        // glUniformMatrix4fv(spLambert.u("M"), 1, false, glm::value_ptr(Mk));
-        spText.bind();
-        // glUniformMatrix4fv(spText.u("M"), 1, false, glm::value_ptr(Mk));
         file.draw(spLambert, spText, camera);
-        spExperimental.setUniformMatrix4fv("M", glm::scale(glm::translate(glm::vec3(0, 1, 10)), vec3(0.1, 0.1, 0.1)));
-        column.draw(spExperimental, camera);
+        spBlinnPhong.setUniformMatrix4fv("M", glm::translate(glm::vec3{0, 5, 0}));
+        spBlinnPhong.setUniform1f("useTexture", 0.0f);
+        plane.draw(spBlinnPhong, camera);
+
+        spBlinnPhong.setUniformMatrix4fv("M", glm::scale(glm::translate(glm::vec3(0, 1, 10)), vec3(0.1, 0.1, 0.1)));
+        spBlinnPhong.setUniform1f("useTexture", 1.0f);
+        column.draw(spBlinnPhong, camera);
+
         
         const int maxLayer = 100;
         spGrass.setUniformMatrix4fv("M", glm::mat4(1));
@@ -102,7 +117,7 @@ public:
             perlin(FD_TEXTURE_DIR"/perlin_single.png", "noise", 3),
             skybox(FD_TEXTURE_DIR"/skybox"),
             
-            spExperimental(FD_SHADER_DIR"/v_blinn_phong.glsl", FD_SHADER_DIR"/f_blinn_phong.glsl"),
+            spBlinnPhong(FD_SHADER_DIR"/v_blinn_phong.glsl", FD_SHADER_DIR"/f_blinn_phong.glsl"),
             spDefault(FD_SHADER_DIR"/v_default.glsl", FD_SHADER_DIR"/f_default.glsl"),
             spText(FD_SHADER_DIR"/v_default_text.glsl", FD_SHADER_DIR"/f_default_text.glsl"),
             spLambert(FD_SHADER_DIR"/v_lambert.glsl", FD_SHADER_DIR"/f_lambert.glsl"),
@@ -110,10 +125,17 @@ public:
             spFile(spLambert),
             
             gun(FD_MODEL_DIR"/raygun.obj", {Texture(FD_TEXTURE_DIR"/raygun_diffuse.jpg", "diffuse", 1)}),
-            column(FD_MODEL_DIR"/column_01.obj", 
-                {Texture(FD_TEXTURE_DIR"/column/column_01_DefaultMaterial_Diffuse.jpg", "diffuse", 1),
-                 Texture(FD_TEXTURE_DIR"/column/column_01_DefaultMaterial_Specular.jpg", "specular", 2),
-                 Texture(FD_TEXTURE_DIR"/column/column_01_DefaultMaterial_Glossiness.jpg", "gloss", 3)}),
+            column_textures({Texture(FD_TEXTURE_DIR"/column/diffuse.jpg",     "diffuse",  1),
+                             Texture(FD_TEXTURE_DIR"/column/specular.jpg",    "specular", 2),
+                             Texture(FD_TEXTURE_DIR"/column/glossiness.jpg",  "gloss",    3)}),
+            marble_textures({Texture(FD_TEXTURE_DIR"/marble/diffuse.jpeg",    "diffuse",  1),
+                             Texture(FD_TEXTURE_DIR"/marble/specular.jpeg",   "specular", 2),
+                             Texture(FD_TEXTURE_DIR"/marble/glossiness.jpeg", "gloss",    3),
+                             Texture(FD_TEXTURE_DIR"/marble/normal.jpeg",     "normal",   4),
+                             Texture(FD_TEXTURE_DIR"/marble/roughness.jpeg",  "rough",    5),
+                             Texture(FD_TEXTURE_DIR"/marble/height.jpeg",     "bump",     6)}),
+            column(FD_MODEL_DIR"/column_01.obj", column_textures), 
+            plane(Mesh::Plane()),
             grass_plane({
                 Vertex({-PLANE_SIZE, 0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.5,  0}, {-PLANE_SIZE, -PLANE_SIZE}), 
                 Vertex({-PLANE_SIZE, 0, PLANE_SIZE},  {0, 1, 0}, {0, 0.75, 0}, {-PLANE_SIZE, PLANE_SIZE}),

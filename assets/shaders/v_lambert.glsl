@@ -1,10 +1,19 @@
 #version 330
 
+struct Light {
+    //if w = 0 then it is directional light
+    vec4 position;
+  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 color;
+};
+uniform Light light; 
 //Uniform variables
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
-uniform vec3 lightPos = vec3(0, 0, -6);
 
 // Positions/Coordinates
 layout (location = 0) in vec3 aPos;
@@ -23,7 +32,10 @@ out vec4 fNormal; //eye space
 out vec4 fViewer;//eye space
 
 void main(void) {
-    fLight = normalize(V * vec4(lightPos, 1) - V * M * vec4(aPos, 1)); //vector towards the light in eye space
+    fLight = normalize(V * light.position - V * M * vec4(aPos, 1)); //vector towards the light in eye space
+    if(light.position.w == 0) {
+        fLight = normalize(vec4(light.position));
+    }
     fViewer = normalize(vec4(0, 0, 0, 1) - V * M * vec4(aPos, 1)); //vector towards the viewer in eye space
     fNormal = normalize(V * M * vec4(aNormal, 0)); //normal vector in eye space
     gl_Position=P*V*M*vec4(aPos, 1);

@@ -1,6 +1,15 @@
 #version 330
 
-uniform float ambientLight = 0;
+struct Light {
+    //if w = 0 then it is directional light
+    vec4 position;
+  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 color;
+};
+uniform Light light; 
 
 out vec4 pixelColor; //Output variable of the fragment shader. (Almost) final pixel color.
 //Varying variables
@@ -24,6 +33,6 @@ void main(void) {
 	//Lighting model computation
 	float nl = clamp(dot(mn, ml), 0, 1);
 	float rv = pow(clamp(dot(mr, mv), 0, 1), 50);
-	pixelColor = vec4(kd.rgb * min(nl + ambientLight, 0.9), kd.a) + vec4(ks.rgb * rv, 0);
+	pixelColor = vec4(kd.rgb * min(nl + light.ambient, 0.9), kd.a) + vec4(ks.rgb * rv, 0);
 	// pixelColor=fColor;
 }

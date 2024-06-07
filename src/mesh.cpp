@@ -4,7 +4,6 @@
 #include <string>
 #include <assert.h>
 #include <unordered_map>
-#include <unordered_set>
 
 void Mesh::addTexture(const Texture& tex) {
     textures.push_back(tex);
@@ -152,4 +151,13 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& idxs,
 	VAO.unbind();
 	VBO.unbind();
 	EBO.unbind();
+}
+static std::vector<Vertex> planeVerticies = { 
+    Vertex({1,  0, 1},  {0, 1, 0}, {1, 0, 1}, {1, 1}),
+    Vertex({-1, 0, 1},  {0, 1, 0}, {1, 0, 1}, {0, 1}),
+    Vertex({-1, 0, -1}, {0, 1, 0}, {1, 0, 1}, {0, 0}),
+    Vertex({1,  0, -1}, {0, 1, 0}, {1, 0, 1}, {1, 0})
+};
+Mesh Mesh::Plane(){
+    return Mesh(planeVerticies, {0, 1, 2, 2, 3, 0}, {});
 }
