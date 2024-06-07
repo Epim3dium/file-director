@@ -2,6 +2,9 @@
 #include <iostream>
 
 Texture::Texture(unsigned char* bitmap, int widthImg, int heightImg, int numColCh, const char* texType, GLuint slot) {
+    if(slot == 0) {
+        std::cerr << "Default texture slot is being used!";
+    }
 	type = texType;
     m_width = widthImg;
     m_height = heightImg;

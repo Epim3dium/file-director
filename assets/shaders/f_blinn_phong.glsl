@@ -37,7 +37,7 @@ void main(void) {
 
     vec3 viewDir = normalize(vec3(inverse(V) * vec4(0, 0, 0, 1)) - fPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float shininess = 16.0;
+    float shininess = 32.0;
     float spec = pow(max(dot(fNormal, halfwayDir), 0.0), shininess);
 
     vec4 color = fColor;

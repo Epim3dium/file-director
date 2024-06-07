@@ -31,9 +31,6 @@ void main(void) {
     vec3 nv=aPos+(fLayer*maxGrassLength/maxLayer)*normalize(aNormal);
     gl_Position=P*V*M*vec4(nv, 1);
     fDistance = gl_Position.z;
-    // mat4 G=mat4(inverse(transpose(mat3(M))));
-    // vec4 n=normalize(V*G*normal);
-    // float nl=clamp(dot(n,lightDir),0,1);
     fColor=vec4(aColor, 1);
     fTex = aTex;
 }
