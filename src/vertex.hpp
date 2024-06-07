@@ -8,6 +8,7 @@ struct Vertex {
     vec3 normal;
     vec3 color;
     vec2 textureUV;
+    glm::vec4 tangent;
     Vertex() {}
     Vertex(vec3 p, vec3 n = {0, 0, 0}, vec3 c = {1, 1, 1}, vec2 t = {0, 0}) : position(p), normal(n), color(c), textureUV(t) {}
 };

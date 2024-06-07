@@ -144,7 +144,8 @@ public:
           column_textures(
               {Texture(FD_TEXTURE_DIR "/column/diffuse.jpg", "diffuse", 1),
                Texture(FD_TEXTURE_DIR "/column/specular.jpg", "specular", 2),
-               Texture(FD_TEXTURE_DIR "/column/glossiness.jpg", "gloss", 3)}),
+               Texture(FD_TEXTURE_DIR "/column/normal.jpg", "normal", 3),
+               Texture(FD_TEXTURE_DIR "/column/glossiness.jpg", "gloss", 4)}),
           marble_textures(
               {Texture(FD_TEXTURE_DIR "/marble/diffuse.jpeg", "diffuse", 1),
                Texture(FD_TEXTURE_DIR "/marble/specular.jpeg", "specular", 2),

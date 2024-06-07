@@ -3,7 +3,7 @@
 
 Texture::Texture(unsigned char* bitmap, int widthImg, int heightImg, int numColCh, const char* texType, GLuint slot) {
     if(slot == 0) {
-        std::cerr << "Default texture slot is being used!";
+        std::cerr << "Default texture slot is being used!\n";
     }
 	type = texType;
     m_width = widthImg;
@@ -71,6 +71,9 @@ Texture::Texture(const char* image, const char* texType, GLuint slot)
 	int widthImg, heightImg, numColCh;
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* bytes = stbi_load(image, &widthImg, &heightImg, &numColCh, 0);
+    if(bytes == nullptr) {
+        std::cerr << "Failed to load image: " << image << "\n";
+    }
     *this = Texture(bytes, widthImg, heightImg, numColCh, texType, slot);
     stbi_image_free(bytes);
 }

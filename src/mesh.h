@@ -12,10 +12,12 @@ struct Mesh {
     std::vector<Texture> textures;
 
     VertexArray VAO;
+    void initVAO();
 
     void draw(Shader& shader, Camera& cam, GLsizei count = 1);
     void addTexture(const Texture& tex);
     void removeTexture(unsigned int ID);
+    void generateTangents();
     static Mesh Plane();
 
     Mesh(std::string obj_filepath, const std::vector<Texture>& textures); 

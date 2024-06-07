@@ -14,6 +14,65 @@ void Mesh::removeTexture(unsigned int ID) {
     //     textures.erase(itr);
     // }
 }
+void Mesh::generateTangents() {
+    for(auto& v : verticies) {
+        v.tangent = glm::vec4(0, 0, 0, 0);
+    }
+    std::vector<glm::vec3> tan1(verticies.size(), glm::vec3(0, 0, 0));
+    std::vector<glm::vec3> tan2(verticies.size(), glm::vec3(0, 0, 0));
+    for(int i = 0; i < indices.size(); i += 3) {
+        size_t i1 = indices[i];
+        size_t i2 = indices[i + 1];
+        size_t i3 = indices[i + 2];
+        glm::vec3 v1 = verticies[i1].position;
+        glm::vec3 v2 = verticies[i2].position;
+        glm::vec3 v3 = verticies[i3].position;
+        glm::vec2 w1 = verticies[i1].textureUV;
+        glm::vec2 w2 = verticies[i2].textureUV;
+        glm::vec2 w3 = verticies[i3].textureUV;
+        float x1 = v2.x - v1.x;
+        float x2 = v3.x - v1.x;
+        float y1 = v2.y - v1.y;
+        float y2 = v3.y - v1.y;
+        float z1 = v2.z - v1.z;
+        float z2 = v3.z - v1.z;
+        
+        float s1 = w2.x - w1.x;
+        float s2 = w3.x - w1.x;
+        float t1 = w2.y - w1.y;
+        float t2 = w3.y - w1.y;
+        float r = 1.0F / (s1 * t2 - s2 * t1);
+        if(abs(s1 * t2 - s2 * t1) < 0.01f || r == 0.) {
+            r = 1.f;
+        }
+        glm::vec3 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+                (t2 * z1 - t1 * z2) * r);
+        glm::vec3 tdir((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+                (s1 * z2 - s2 * z1) * r);
+
+        tan1[i1] += sdir;
+        tan1[i2] += sdir;
+        tan1[i3] += sdir;
+        
+        tan2[i1] += tdir;
+        tan2[i2] += tdir;
+        tan2[i3] += tdir;
+    }
+    for(int i = 0; i < verticies.size(); i++) {
+        const glm::vec3& n = verticies[i].normal;
+        const glm::vec3& t = tan1[i];
+        
+        // Gram-Schmidt orthogonalize
+        verticies[i].tangent = glm::vec4(glm::normalize(t - n * glm::dot(n, t)), 0);
+        if(isnan(verticies[i].tangent.x) || isnan(verticies[i].tangent.y) || isnan(verticies[i].tangent.z)) {
+            verticies[i].tangent = verticies[i - 1].tangent;
+        }
+
+        
+        // Calculate handedness
+        verticies[i].tangent.w = (glm::dot(glm::cross(n, t), tan2[i]) < 0.0F) ? -1.0F : 1.0F;
+    }
+}
 
 void Mesh::draw(Shader& shader, Camera& cam, GLsizei count) {
     // Bind shader to be able to access uniforms
@@ -50,7 +109,7 @@ static int cantor(int a, int b) {
 static int hash_set(int a, int b, int c) {
    return cantor(a, cantor(b, c));
 }
-Mesh::Mesh(std::string obj_filepath, const std::vector<Texture>& textures)  {
+Mesh::Mesh(std::string obj_filepath, const std::vector<Texture>& textures) : textures(textures){
     std::ifstream in(obj_filepath);
     std::string line;
     //v
@@ -98,6 +157,11 @@ Mesh::Mesh(std::string obj_filepath, const std::vector<Texture>& textures)  {
                 int pos_idx, tex_idx, norm_idx;
                 ss>>pos_idx>>dummy>>tex_idx>>dummy>>norm_idx;
                 pos_idx--; tex_idx--; norm_idx--;
+                //if reading quads
+                if(i > 3) {
+                    // std::cerr << "more than Quads not supported\n"; 
+                    break;
+                }
                 
                 int hash = hash_set(pos_idx, tex_idx, norm_idx);
                 auto itr = indexSet_to_index.find(hash);
@@ -111,12 +175,7 @@ Mesh::Mesh(std::string obj_filepath, const std::vector<Texture>& textures)  {
                     verticies.push_back(vert);
                 }
                 
-                //if reading quads
-                if(i > 3) {
-                    // std::cerr << "more than Quads not supported\n"; 
-                    break;
-                }
-                else if(i == 3) {
+                if(i == 3) {
                     size_t index0 = indices[indices.size() - 1];
                     size_t index1 = indices[indices.size() - 3];
                     indices.push_back(index);
@@ -131,15 +190,13 @@ Mesh::Mesh(std::string obj_filepath, const std::vector<Texture>& textures)  {
             }
         }
     }
-    *this = Mesh(verticies, indices, textures);
+    generateTangents();
+    initVAO();
 }
-
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& idxs, const std::vector<Texture>& texs) 
-    : verticies(vertices), indices(idxs), textures(texs) {
-
+void Mesh::initVAO() {
 	VAO.bind();
 	// Generates Vertex Buffer Object and links it to vertices
-	VertexBuffer VBO(vertices);
+	VertexBuffer VBO(verticies);
 	// Generates Element Buffer Object and links it to indices
 	ElementsBuffer EBO(indices);
 	// Links VBO attributes such as coordinates and colors to VAO
@@ -147,10 +204,18 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& idxs,
 	VAO.link(VBO, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)(3 * sizeof(float)));
 	VAO.link(VBO, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)(6 * sizeof(float)));
 	VAO.link(VBO, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)(9 * sizeof(float)));
+    VAO.link(VBO, 4, 4, GL_FLOAT, sizeof(Vertex), (void*)(11 * sizeof(float)));
 	// Unbind all to prevent accidentally modifying them
 	VAO.unbind();
 	VBO.unbind();
 	EBO.unbind();
+}
+
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& idxs, const std::vector<Texture>& texs) 
+    : verticies(vertices), indices(idxs), textures(texs) 
+{
+    generateTangents();
+    initVAO();
 }
 static std::vector<Vertex> planeVerticies = { 
     Vertex({1,  0, 1},  {0, 1, 0}, {1, 0, 1}, {1, 1}),
