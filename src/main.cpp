@@ -24,6 +24,7 @@ public:
     
     Skybox skybox;
     Shader spDefault;
+    Shader spExperimental;
     Shader spGrass;
     Shader spLambert;
     Shader spFile;
@@ -41,7 +42,8 @@ public:
     
     Camera camera;
     glm::mat4 Mk;
-#define SUN_POSITION (glm::normalize(glm::vec3(3, 4, -10.2)) * 100000.f)
+#define SUN_DIR (-glm::normalize(glm::vec3(3, 4, -10.2)))
+#define SUN_POSITION (glm::vec4(-SUN_DIR, 1) * 100000.f)
 
     float angle = 0.f;
     bool setup() override final {
@@ -54,8 +56,11 @@ public:
             tex.unbind();
         }
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        spLambert.setUniform3f("lightPos", SUN_POSITION);
-        spLambert.setUniform1f("ambientLight", 0.5f);
+        spExperimental.setUniform4f("light.position", glm::vec4(SUN_DIR, 0));
+        spExperimental.setUniform3f("light.color",    glm::vec3(1,   1,   1));
+        spExperimental.setUniform3f("light.specular", glm::vec3(1,   1,   1));
+        spExperimental.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
+        spExperimental.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
         return true;
     }
     void update() override final  {
@@ -71,8 +76,8 @@ public:
         spText.bind();
         // glUniformMatrix4fv(spText.u("M"), 1, false, glm::value_ptr(Mk));
         file.draw(spLambert, spText, camera);
-        spDefault.setUniformMatrix4fv("M", glm::scale(glm::translate(glm::vec3(0, 1, 10)), vec3(0.1, 0.1, 0.1)));
-        column.draw(spDefault, camera);
+        spExperimental.setUniformMatrix4fv("M", glm::scale(glm::translate(glm::vec3(0, 1, 10)), vec3(0.1, 0.1, 0.1)));
+        column.draw(spExperimental, camera);
         
         const int maxLayer = 100;
         spGrass.setUniformMatrix4fv("M", glm::mat4(1));
@@ -97,6 +102,7 @@ public:
             perlin(FD_TEXTURE_DIR"/perlin_single.png", "noise", 3),
             skybox(FD_TEXTURE_DIR"/skybox"),
             
+            spExperimental(FD_SHADER_DIR"/v_blinn_phong.glsl", FD_SHADER_DIR"/f_blinn_phong.glsl"),
             spDefault(FD_SHADER_DIR"/v_default.glsl", FD_SHADER_DIR"/f_default.glsl"),
             spText(FD_SHADER_DIR"/v_default_text.glsl", FD_SHADER_DIR"/f_default_text.glsl"),
             spLambert(FD_SHADER_DIR"/v_lambert.glsl", FD_SHADER_DIR"/f_lambert.glsl"),
@@ -104,7 +110,10 @@ public:
             spFile(spLambert),
             
             gun(FD_MODEL_DIR"/raygun.obj", {Texture(FD_TEXTURE_DIR"/raygun_diffuse.jpg", "diffuse", 1)}),
-            column(FD_MODEL_DIR"/column_01.obj", {Texture(FD_TEXTURE_DIR"/column/column_01_DefaultMaterial_Diffuse.jpg", "diffuse", 1)}),
+            column(FD_MODEL_DIR"/column_01.obj", 
+                {Texture(FD_TEXTURE_DIR"/column/column_01_DefaultMaterial_Diffuse.jpg", "diffuse", 1),
+                 Texture(FD_TEXTURE_DIR"/column/column_01_DefaultMaterial_Specular.jpg", "specular", 2),
+                 Texture(FD_TEXTURE_DIR"/column/column_01_DefaultMaterial_Glossiness.jpg", "gloss", 3)}),
             grass_plane({
                 Vertex({-PLANE_SIZE, 0, -PLANE_SIZE}, {0, 1, 0}, {0, 0.5,  0}, {-PLANE_SIZE, -PLANE_SIZE}), 
                 Vertex({-PLANE_SIZE, 0, PLANE_SIZE},  {0, 1, 0}, {0, 0.75, 0}, {-PLANE_SIZE, PLANE_SIZE}),
