@@ -15,13 +15,13 @@ public:
     void bind() const;
     void unbind() const;
     
-    GLuint u(const char* variableName);
-    void setUniform1f(const char* var, float value);
-    void setUniform2f(const char* var, glm::vec2 value);
-    void setUniform3f(const char* var, glm::vec3 value);
-    void setUniform4f(const char* var, glm::vec4 value);
-    void setUniformMatrix3fv(const char* var, glm::mat3 value);
-    void setUniformMatrix4fv(const char* var, glm::mat4 value);
+    GLuint u(const char* variableName) const;
+    void setUniform1f(const char* var, float value)           const ;
+    void setUniform2f(const char* var, glm::vec2 value)       const ;
+    void setUniform3f(const char* var, glm::vec3 value)       const ;
+    void setUniform4f(const char* var, glm::vec4 value)       const ;
+    void setUniformMatrix3fv(const char* var, glm::mat3 value)const ;
+    void setUniformMatrix4fv(const char* var, glm::mat4 value)const ;
     GLuint a(const char* variableName);
 
 private:

@@ -61,17 +61,13 @@ public:
 
         default_texture.bind();
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        spBlinnPhong.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));
-        spBlinnPhong.setUniform3f("light.color",    glm::vec3(1,   1,   1));
-        spBlinnPhong.setUniform3f("light.specular", glm::vec3(1,   1,   1));
-        spBlinnPhong.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
-        spBlinnPhong.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
-        glm::vec4 fLight = glm::normalize(camera.V *glm::vec4(SUN_POSITION, 1) - camera.V * mat4(1) * glm::vec4(0, 0, 0, 1)); //vector towards the light in eye space
-        spLambert.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));
-        spLambert.setUniform3f("light.color",    glm::vec3(1,   1,   1));
-        spLambert.setUniform3f("light.specular", glm::vec3(1,   1,   1));
-        spLambert.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
-        spLambert.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
+        for( auto& sp : {spBlinnPhong, spLambert}) {
+            sp.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));
+            sp.setUniform3f("light.color",    glm::vec3(1,   1,   1));
+            sp.setUniform3f("light.specular", glm::vec3(1,   1,   1));
+            sp.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
+            sp.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
+        }
         return true;
     }
     void update() override final  {
