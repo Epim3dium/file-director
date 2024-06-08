@@ -1,5 +1,15 @@
 #version 330
 
+struct Light {
+    //if w = 0 then it is directional light
+    vec4 position;
+  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 color;
+};
+uniform Light light; 
 //Uniform variables
 uniform mat4 M;
 uniform mat4 V;
@@ -23,19 +33,27 @@ out vec4 fColor;
 out vec2 fTex;
 out vec3 fNormal;
 out vec3 fPos;
-out mat3 TBN;
+
+out vec3 fLightDir;
+out vec3 fViewDir;
+out mat4 TBN;
 
 void main(void) {
-    vec3 T = normalize(vec3(M * vec4(aTangent.xyz, 0.0)));
-    vec3 N = normalize(vec3(M * vec4(aNormal, 0.0)));
+    //workaround
+    mat4 NormalMatrix = mat4(mat3(transpose(inverse(M))));
+    vec4 T = normalize(NormalMatrix * vec4(aTangent.xyz, 0.0));
+    vec4 N = normalize(NormalMatrix * vec4(aNormal, 0.0));
     T = normalize(T - dot(T, N) * N);
-    vec3 B = cross(N, T);
-    TBN = mat3(T, B, N);
+    vec4 B = normalize(vec4(cross(vec3(N), vec3(T)), 0));
+
+    TBN = mat4(T, B, N, vec4(0, 0, 0, 1));
+
+    vec3 VertPos=  vec3(M * vec4(aPos, 1));
+    fViewDir=  vec3(inverse(V)*vec4(0, 0, 0, 1)) - VertPos;
+    fLightDir= vec3(light.position) - VertPos;
 
     fNormal = normalize(mat3(transpose(inverse(M))) * aNormal);
-    // mat4 G=mat4(inverse(transpose(mat3(M))));
-    // vec4 n=normalize(V*G*normal);
-    // float nl=clamp(dot(n,lightDir),0,1);
+
     gl_Position = P*V*M* vec4(aPos, 1.0);
     fPos = vec3(M*vec4(aPos, 1.0));
     fColor=vec4(aColor, 1);

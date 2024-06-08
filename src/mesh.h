@@ -18,7 +18,9 @@ struct Mesh {
     void addTexture(const Texture& tex);
     void removeTexture(unsigned int ID);
     void generateTangents();
-    static Mesh Plane();
+    static Mesh Plane(float size = 1, std::vector<Texture> textures = {});
+    static Mesh UniformConvex(float radius, size_t sides, std::vector<Texture> textures = {});
+    static Mesh UniformConvexCutout(float large_size, float radius, size_t sides, std::vector<Texture> textures = {});
 
     Mesh(std::string obj_filepath, const std::vector<Texture>& textures); 
     Mesh(const std::vector<Vertex>& verticies, const std::vector<GLuint>& indices, const std::vector<Texture>& textures); 

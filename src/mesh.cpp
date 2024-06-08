@@ -217,12 +217,92 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& idxs,
     generateTangents();
     initVAO();
 }
-static std::vector<Vertex> planeVerticies = { 
-    Vertex({1,  0, 1},  {0, 1, 0}, {1, 0, 1}, {1, 1}),
-    Vertex({-1, 0, 1},  {0, 1, 0}, {1, 0, 1}, {0, 1}),
-    Vertex({-1, 0, -1}, {0, 1, 0}, {1, 0, 1}, {0, 0}),
-    Vertex({1,  0, -1}, {0, 1, 0}, {1, 0, 1}, {1, 0})
-};
-Mesh Mesh::Plane(){
-    return Mesh(planeVerticies, {0, 1, 2, 2, 3, 0}, {});
+Mesh Mesh::Plane(float size, std::vector<Texture> texs){
+    const std::vector<Vertex> planeVerticies = { 
+        Vertex({size,  0, size},  {0, 1, 0}, {1, 0, 1}, {size, size}),
+        Vertex({-size, 0, size},  {0, 1, 0}, {1, 0, 1}, {0, size}),
+        Vertex({-size, 0, -size}, {0, 1, 0}, {1, 0, 1}, {0, 0}),
+        Vertex({size,  0, -size}, {0, 1, 0}, {1, 0, 1}, {size, 0})
+    };
+    return Mesh(planeVerticies, {0, 1, 2, 2, 3, 0}, texs);
+}
+Mesh Mesh::UniformConvex(float radius, size_t sides, std::vector<Texture> textures) {
+    std::vector<Vertex> planeVerticies;
+    std::vector<GLuint> indicies;
+    planeVerticies.push_back(Vertex({0, 0, 0}, {0, 1, 0}, {1, 0, 1}, glm::vec2(0.5, 0.5) * radius));
+    for(int i = 0; i < sides + 1; i++) {
+        float angle = 2.f * M_PI / static_cast<float>(sides) * i;
+        glm::vec3 dir = {cos(angle), 0, sin(angle)};
+        glm::vec2 texCoord = glm::vec2(dir.x, dir.z) * 0.5f + 0.5f;
+        glm::vec3 pos = dir * radius;
+        planeVerticies.push_back(Vertex(pos, {0, 1, 0}, {1, 0, 1}, texCoord * radius));
+        if(i > 0) {
+            indicies.push_back(0);
+            indicies.push_back(planeVerticies.size() - 1);
+            indicies.push_back(planeVerticies.size() - 2);
+        }
+    }
+    return Mesh(planeVerticies, indicies, textures);
+}
+Mesh Mesh::UniformConvexCutout(float large_size, float radius, size_t sides, std::vector<Texture> textures) {
+    std::vector<Vertex> planeVerticies;
+    std::vector<GLuint> indicies;
+    const int BL = 0;
+    const int BR = 1;
+    const int TL = 2;
+    const int TR = 3;
+    planeVerticies.push_back(Vertex({-radius, 0, -radius}, {0, 1, 0}, {1, 0, 1}, glm::vec2(0, 0) * radius));
+    planeVerticies.push_back(Vertex({radius, 0, -radius}, {0, 1, 0}, {1, 0, 1}, glm::vec2(1, 0) * radius));
+    planeVerticies.push_back(Vertex({-radius, 0, radius}, {0, 1, 0}, {1, 0, 1}, glm::vec2(0, 1) * radius));
+    planeVerticies.push_back(Vertex({radius, 0, radius}, {0, 1, 0}, {1, 0, 1}, glm::vec2(1, 1) * radius));
+    
+    if(large_size != radius) {
+        planeVerticies.push_back(Vertex({-large_size, 0, -large_size}, {0, 1, 0}, {1, 0, 1}, glm::vec2(-1, -1) * large_size));
+        planeVerticies.push_back(Vertex({large_size, 0, -large_size}, {0, 1, 0}, {1, 0, 1}, glm::vec2(1, -1) * large_size));
+        planeVerticies.push_back(Vertex({-large_size, 0, large_size}, {0, 1, 0}, {1, 0, 1}, glm::vec2(-1, 1) * large_size));
+        planeVerticies.push_back(Vertex({large_size, 0, large_size}, {0, 1, 0}, {1, 0, 1}, glm::vec2(1, 1) * large_size));
+        for( auto [a, b] : std::vector<std::pair<int, int>>{ {TL, TR}, {TR, BR}, {BL, BR}, {TL, BL}}) {
+            indicies.push_back(a);
+            indicies.push_back(b);
+            indicies.push_back(a + 4);
+
+            indicies.push_back(b);
+            indicies.push_back(a + 4);
+            indicies.push_back(b + 4);
+        }
+    }
+    
+    int prevMaster = TR;
+    float prevAngle = 0.f;
+    for(int i = 0; i < sides + 1; i++) {
+        float angle = 2.f * M_PI / static_cast<float>(sides) * i;
+        glm::vec3 dir = {cos(angle), 0, sin(angle)};
+        glm::vec2 texCoord = glm::vec2(dir.x, dir.z) * 0.5f + 0.5f;
+        glm::vec3 pos = dir * radius;
+        planeVerticies.push_back(Vertex(pos, {0, 1, 0}, {1, 0, 1}, texCoord * radius));
+        if(i > 0) {
+            float avgang = (angle + prevAngle) * 0.5f;
+            int master = TR;
+            if(avgang >= 2.f * M_PI * 0.75f) {
+                master = BR;
+            }else if(avgang >= M_PI) {
+                master = BL;
+            }else if(avgang >= 2.f * M_PI * 0.25f) {
+                master = TL;
+            }else {
+                master = TR;
+            }
+            indicies.push_back(master);
+            indicies.push_back(planeVerticies.size() - 1);
+            indicies.push_back(planeVerticies.size() - 2);
+            if(master != prevMaster) {
+                indicies.push_back(master);
+                indicies.push_back(prevMaster);
+                indicies.push_back(planeVerticies.size() - 2);
+            }
+            prevMaster = master;
+        }    
+        prevAngle = angle;
+    }
+    return Mesh(planeVerticies, indicies, textures);
 }

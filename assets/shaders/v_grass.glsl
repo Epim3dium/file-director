@@ -7,8 +7,13 @@ uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 
-uniform float maxGrassLength = 1.f;
-uniform float maxLayer = 1.f;
+struct Grass {
+    float length ;
+    float maxLayer ;
+    float maxDistance ;
+    float padding ;
+};
+uniform Grass grass;
 
 // Positions/Coordinates
 layout (location = 0) in vec3 aPos;
@@ -25,12 +30,14 @@ out vec4 fColor;
 out vec2 fTex;
 out float fLayer;
 out float fDistance;
+out vec3 fPos;
 
 void main(void) {
     fLayer = gl_InstanceID;
-    vec3 nv=aPos+(fLayer*maxGrassLength/maxLayer)*normalize(aNormal);
+    vec3 nv=aPos+(fLayer*grass.length/grass.maxLayer)*normalize(aNormal);
     gl_Position=P*V*M*vec4(nv, 1);
     fDistance = gl_Position.z;
     fColor=vec4(aColor, 1);
     fTex = aTex;
+    fPos = vec3(M * vec4(aPos, 1));
 }
