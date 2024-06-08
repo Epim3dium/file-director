@@ -48,6 +48,7 @@ public:
 #define SUN_POSITION (-SUN_DIR * 100000.f)
 
     static constexpr float arena_size = 10.f;
+    static constexpr float arena_sides = 5.f;
     float angle = 0.f;
     bool setup() override final {
         glEnable(GL_BLEND);
@@ -58,16 +59,32 @@ public:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
             tex.unbind();
         }
+        for(auto& tex : marble_textures) {
+            tex.bind();
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+            tex.unbind();
+        }
 
         default_texture.bind();
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        for( auto& sp : {spBlinnPhong, spLambert}) {
-            sp.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));
-            sp.setUniform3f("light.color",    glm::vec3(1,   1,   1));
-            sp.setUniform3f("light.specular", glm::vec3(1,   1,   1));
-            sp.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));
-            sp.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));
-        }
+        spBlinnPhong.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));
+        spBlinnPhong.setUniform3f("light.color",    glm::vec3(1,   1,   1));    
+        spBlinnPhong.setUniform3f("light.specular", glm::vec3(1,   1,   1));    
+        spBlinnPhong.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));  
+        spBlinnPhong.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));  
+                                                                                
+        spLambert.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));   
+        spLambert.setUniform3f("light.color",    glm::vec3(1,   1,   1));       
+        spLambert.setUniform3f("light.specular", glm::vec3(1,   1,   1));       
+        spLambert.setUniform3f("light.diffuse",  glm::vec3(0.5, 0.5, 0.5));     
+        spLambert.setUniform3f("light.ambient",  glm::vec3(0.2, 0.2, 0.2));     
+
+        spGrass.setUniform4f("light.position", glm::vec4(SUN_POSITION, 1));   
+        spGrass.setUniform3f("light.color",    glm::vec3(1,   1,   1));       
+        spGrass.setUniform3f("light.specular", glm::vec3(1,   1,   1));       
+        spGrass.setUniform3f("light.diffuse",  glm::vec3(0.2, 0.2, 0.2));     
+        spGrass.setUniform3f("light.ambient",  glm::vec3(0.5, 0.5, 0.5));     
         return true;
     }
     void update() override final  {
@@ -80,13 +97,22 @@ public:
 		Mk = glm::rotate(Mk, glm::radians(0.3f), glm::vec3(0.0f, 1.0f, 0.0f));
         file.draw(spLambert, spText, camera);
 
+
         spBlinnPhong.setUniform3f("light.ambient", glm::vec3(0.5, 0.5, 0.5));
         spBlinnPhong.setUniformMatrix4fv("M", glm::translate(glm::vec3{0, 0, 0}));
         marble_plane.draw(spBlinnPhong, camera);
         spBlinnPhong.setUniform3f("light.ambient", glm::vec3(0.2, 0.2, 0.2));
 
-        spBlinnPhong.setUniformMatrix4fv("M", glm::scale(glm::translate(glm::vec3(0, 1, 10)), vec3(0.05, 0.05, 0.05)));
-        // column.draw(spBlinnPhong, camera);
+        for(float i = 0; i < arena_sides; i++) {
+            float angle = 2.f * M_PI / arena_sides * i;
+            glm::vec3 dir = {cos(angle), 0, sin(angle)};
+            glm::mat4 M(1.f);
+            M = glm::translate(dir * arena_size);
+            M = glm::rotate(M, (float)M_PI * 0.5f - angle, {0, 1, 0});
+            M = glm::scale(M, vec3(0.03, 0.03, 0.03));
+            spBlinnPhong.setUniformMatrix4fv("M", M);
+            column.draw(spBlinnPhong, camera);
+        }
 
         grass_cutout.draw(camera, spGrass, time);
         
@@ -130,8 +156,8 @@ public:
                Texture(FD_TEXTURE_DIR "/marble/roughness.jpeg", "rough", 5),
                Texture(FD_TEXTURE_DIR "/marble/height.jpeg", "height", 6)}),
           column(FD_MODEL_DIR "/column_01.obj", column_textures),
-          grass_cutout(FD_TEXTURE_DIR "/grass.jpg", FD_TEXTURE_DIR "/grass_detail.png", FD_TEXTURE_DIR "/perlin_single.png", Mesh::UniformConvexCutout(100.f, arena_size, 8)), 
-          marble_plane(Mesh::UniformConvex(arena_size, 8, marble_textures)),
+          grass_cutout(FD_TEXTURE_DIR "/grass.jpg", FD_TEXTURE_DIR "/grass_detail.png", FD_TEXTURE_DIR "/perlin_single.png", Mesh::UniformConvexCutout(100.f, arena_size, arena_sides)), 
+          marble_plane(Mesh::UniformConvex(arena_size, arena_sides, marble_textures)),
 
           camera(WIDTH, HEIGHT, glm::vec3(0, 1, -5), glm::vec3(0, 1, 1)),
           App(w, h) {}

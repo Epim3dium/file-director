@@ -1,6 +1,16 @@
 
 #version 330
 
+struct Light {
+    //if w = 0 then it is directional light
+    vec4 position;
+  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 color;
+};
+uniform Light light; 
 //Uniform variables
 uniform vec3 camPos;
 uniform mat4 M;
@@ -30,14 +40,25 @@ out vec4 fColor;
 out vec2 fTex;
 out float fLayer;
 out float fDistance;
-out vec3 fPos;
+out vec4 fPos;
+
+out vec4 fLight;//eye space
+out vec4 fNormal; //eye space
+out vec4 fViewer;//eye space
 
 void main(void) {
     fLayer = gl_InstanceID;
     vec3 nv=aPos+(fLayer*grass.length/grass.maxLayer)*normalize(aNormal);
     gl_Position=P*V*M*vec4(nv, 1);
+
+    fPos = V * M * vec4(aPos, 1);
+    fLight = V * light.position; //vector towards the light in eye space
+    if(light.position.w == 0) {
+        fLight = normalize(vec4(light.position));
+    }
+    fViewer = vec4(0, 0, 0, 1); //vector towards the viewer in eye space
+    fNormal = V * M * vec4(aNormal, 0); //normal vector in eye space
+
     fDistance = gl_Position.z;
-    fColor=vec4(aColor, 1);
     fTex = aTex;
-    fPos = vec3(M * vec4(aPos, 1));
 }

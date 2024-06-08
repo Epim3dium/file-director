@@ -31,22 +31,22 @@
     }
     const glm::vec3 File::FILE_COLOR = {1, 215.f / 255.f, 119.f / 255.f};
     const std::vector<Vertex> File::VERTICES = {
-        {glm::vec3(0.0f,  0.0f,  0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.0f, 0.0f)}, //center
-        {glm::vec3(-1.0f, 1.0f,  0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.0f, 1.0f)}, //top-left corner
-        {glm::vec3(-0.4f, 1.0f,  0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.3f, 1.0f)}, //end of the sticking out stub
-        {glm::vec3(-0.2f, 0.8f,  0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.4f, 0.9f)}, //downslope of sticking out stub
-        {glm::vec3(1.0f,  0.8f,  0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(1.0f, 0.9f)}, //top-right corner
-        {glm::vec3(1.0f,  -1.0f, 0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(1.0f, 0.0f)}, //bottom-right
-        {glm::vec3(-1.0f, -1.0f, 0.001f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.0f, 0.0f)}, //bottom-left
+        {glm::vec3(0.0f,  0.0f,  0.01f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.0f, 0.0f)}, //center
+        {glm::vec3(-1.0f, 1.0f,  0.01f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.0f, 1.0f)}, //top-left corner
+        {glm::vec3(-0.4f, 1.0f,  0.01f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.3f, 1.0f)}, //end of the sticking out stub
+        {glm::vec3(-0.2f, 0.8f,  0.01f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.4f, 0.9f)}, //downslope of sticking out stub
+        {glm::vec3(1.0f,  0.8f,  0.01f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(1.0f, 0.9f)}, //top-right corner
+        {glm::vec3(1.0f,  -1.0f, 0.01f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(1.0f, 0.0f)}, //bottom-right
+        {glm::vec3(-1.0f, -1.0f, 0.01f), glm::vec3(0, 0, 1), FILE_COLOR, glm::vec2(0.0f, 0.0f)}, //bottom-left
 
         
-        {glm::vec3(0.0f,  0.0f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.0f, 0.0f)},  //center
-        {glm::vec3(-1.0f, 1.0f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.0f, 1.0f)},  //top-left corner
-        {glm::vec3(-0.4f, 1.0f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.3f, 1.0f)},  //end of the sticking out stub
-        {glm::vec3(-0.2f, 0.8f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.4f, 0.9f)},  //downslope of sticking out stub
-        {glm::vec3(1.0f,  0.8f, -0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(1.0f, 0.9f)},  //top-right corner
-        {glm::vec3(1.0f,  -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(1.0f, 0.0f)}, //bottom-right
-        {glm::vec3(-1.0f, -1.0f,-0.001f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.0f, 0.0f)}, //bottom-left
+        {glm::vec3(0.0f,  0.0f, -0.01f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.0f, 0.0f)},  //center
+        {glm::vec3(-1.0f, 1.0f, -0.01f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.0f, 1.0f)},  //top-left corner
+        {glm::vec3(-0.4f, 1.0f, -0.01f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.3f, 1.0f)},  //end of the sticking out stub
+        {glm::vec3(-0.2f, 0.8f, -0.01f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.4f, 0.9f)},  //downslope of sticking out stub
+        {glm::vec3(1.0f,  0.8f, -0.01f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(1.0f, 0.9f)},  //top-right corner
+        {glm::vec3(1.0f,  -1.0f,-0.01f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(1.0f, 0.0f)}, //bottom-right
+        {glm::vec3(-1.0f, -1.0f,-0.01f), glm::vec3(0, 0,-1), FILE_COLOR, glm::vec2(0.0f, 0.0f)}, //bottom-left
     };
     const std::vector<GLuint> File::INDICES = {
             0, 1, 2,

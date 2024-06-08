@@ -61,8 +61,7 @@ Texture::Texture(unsigned char* bitmap, int widthImg, int heightImg, int numColC
 		);
 	else
 		throw std::invalid_argument("Automatic Texture type recognition failed");
-
-	glGenerateMipmap(GL_TEXTURE_2D);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
