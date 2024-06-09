@@ -2,9 +2,11 @@
 #include <iostream>
 #include <filesystem>
 #include <thread>
+#include <array>
 #include "defs.h"
 #include "shader.h"
 #include "camera.h"
+#include "texture.h"
 
 static const float skyboxVertices[] =
 {
@@ -50,5 +52,7 @@ private:
     unsigned int cubemapTexture;
 public:
     void draw(const Camera& cam);
+    void decomission();
     Skybox(std::string filepath);
+    Skybox(std::array<Bitmap, 6> bitmaps);
 };

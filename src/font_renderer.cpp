@@ -35,6 +35,12 @@ int FontRenderer::getPixelWidth(std::string text, int font_height) {
     return (x / font_height + 1) * font_height;
 }
 Texture FontRenderer::generate(std::string text, int width, int height, GLuint slot, int font_height, const char* type) {
+    auto bmp = generateBitmap(text, width, height, font_height);
+    auto tex = Texture(bmp, type, slot);
+    delete[] bmp.data;
+    return tex;
+}
+Bitmap FontRenderer::generateBitmap(std::string text, int width, int height, int font_height) {
     int ascent, descent, lineGap;
     if(font_height == 0){
         std::cerr << "overloaded for: "<< text << "\n";
@@ -48,7 +54,7 @@ Texture FontRenderer::generate(std::string text, int width, int height, GLuint s
     int x = 0;
     int y = 0;
     
-    std::vector<unsigned char> bitmap(width * height );
+    unsigned char* bitmap = new unsigned char[width * height] {0};
     for (int i = 0; i < text.size(); ++i)
     {
         int ax;
@@ -72,9 +78,13 @@ Texture FontRenderer::generate(std::string text, int width, int height, GLuint s
         if(yoff > height) {
             break;
         }
+        if(x + roundf(ax * scale) > width) {
+            y += font_height; 
+            x = 0;
+        }
 
         int byteOffset = x + roundf(lsb * scale) + (yoff * width);
-        stbtt_MakeCodepointBitmap(&info, bitmap.data() + byteOffset, c_x2 - c_x1, c_y2 - c_y1, width, scale, scale, text[i]);
+        stbtt_MakeCodepointBitmap(&info, bitmap + byteOffset, c_x2 - c_x1, c_y2 - c_y1, width, scale, scale, text[i]);
 
         x += roundf(ax * scale);
 
@@ -82,10 +92,7 @@ Texture FontRenderer::generate(std::string text, int width, int height, GLuint s
             int kern = stbtt_GetCodepointKernAdvance(&info, text[i], text[i + 1]);
             x += roundf(kern * scale);
         }
-        if(x > width) {
-            y += font_height; 
-            x = 0;
-        }
     }
-    return Texture(bitmap.data(), width, height, 1, type, slot); 
+    std::cerr << "generated: " << text.substr(0, 32) << "\n";
+    return {width, height, bitmap, 1}; 
 }

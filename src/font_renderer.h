@@ -13,6 +13,7 @@ public:
 
 	FontRenderer(const char* font);
     Texture generate(std::string text, int width, int height, GLuint slot, int font_height = 0, const char* type = "text");
+    Bitmap generateBitmap(std::string text, int width, int height, int font_height = 0);
     int getPixelWidth(std::string text, int font_height);
 };
 #endif

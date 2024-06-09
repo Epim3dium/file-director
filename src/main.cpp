@@ -46,6 +46,7 @@ public:
     static constexpr float arena_sides = 5.f;
     float angle = 0.f;
     bool setup() override final {
+        std::cerr << "setupping\n";
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         for(auto& tex : {default_texture}) {
@@ -80,6 +81,7 @@ public:
         spGrass.setUniform3f("light.specular", glm::vec3(1,   1,   1));       
         spGrass.setUniform3f("light.diffuse",  glm::vec3(0.2, 0.2, 0.2));     
         spGrass.setUniform3f("light.ambient",  glm::vec3(0.5, 0.5, 0.5));     
+        std::cerr << "EOS\n";
         return true;
     }
     void update() override final  {
@@ -88,7 +90,6 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         arena.draw(window, camera, {spLambert, spText, spBlinnPhong, spGrass, spDefault});
         
-        skybox.draw(camera);
     }
     void cleanup() override final {}
     Demo(const Demo &) = default;
@@ -113,25 +114,23 @@ public:
               {Texture(FD_TEXTURE_DIR "/column/diffuse.jpg", "diffuse", 1),
                Texture(FD_TEXTURE_DIR "/column/specular.jpg", "specular", 2),
                Texture(FD_TEXTURE_DIR "/column/normal.jpg", "normal", 3),
-               Texture(FD_TEXTURE_DIR "/column/height.jpg", "height", 4),
-               Texture(FD_TEXTURE_DIR "/column/glossiness.jpg", "gloss", 5)}),
+               Texture(FD_TEXTURE_DIR "/column/height.jpg", "height", 4)}),
           marble_textures(
               {Texture(FD_TEXTURE_DIR "/marble/diffuse.jpeg", "diffuse", 1),
                Texture(FD_TEXTURE_DIR "/marble/specular.jpeg", "specular", 2),
-               Texture(FD_TEXTURE_DIR "/marble/glossiness.jpeg", "gloss", 3),
                Texture(FD_TEXTURE_DIR "/marble/normal.jpeg", "normal", 4),
-               Texture(FD_TEXTURE_DIR "/marble/roughness.jpeg", "rough", 5),
                Texture(FD_TEXTURE_DIR "/marble/height.jpeg", "height", 6)}),
           column(FD_MODEL_DIR "/column_01.obj", column_textures),
 
           camera(WIDTH, HEIGHT, glm::vec3(0, 1, -5), glm::vec3(0, 1, 1)),
-          arena(fs::current_path(), column_textures, column, marble_textures, font_renderer),
+          arena(fs::current_path(), column, marble_textures, font_renderer, skybox),
           App(w, h) {}
 };
 
 int main(int argc, char** argv) {
     InputParser input(argc, argv);
     Demo demo(WIDTH, HEIGHT);
+    std::cerr << "running:\n";
     demo.run();
 
 }

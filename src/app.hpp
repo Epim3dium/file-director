@@ -13,9 +13,9 @@ const unsigned int DEFAULT_HEIGHT = 800;
 
 
 class App {
-    float currentFrame;
-    float passedTime;
-    float lastFrame;
+    float currentFrame = 0.f;
+    float passedTime = 0.f;
+    float lastFrame = 0.f;
     static bool isGLError() {
         while (GLenum error = glGetError()) {
             std::cout << "GL error [" << error << "]" << std::endl;

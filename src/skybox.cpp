@@ -1,6 +1,22 @@
 #include "skybox.h"
 #include "glm/gtc/type_ptr.hpp"
 Skybox::Skybox(std::string filepath) {
+    std::array<Bitmap, 6> bitmaps;
+    std::string facesCubemap[6] =
+    {
+        filepath + "/right.jpg",
+        filepath + "/left.jpg",
+        filepath + "/top.jpg",
+        filepath + "/bottom.jpg",
+        filepath + "/front.jpg",
+        filepath + "/back.jpg"
+    };
+    for(int i = 0; i < 6; i++) {
+        bitmaps[i] = Texture::loadFromFile(facesCubemap[i].c_str(), false);
+    }
+    *this = Skybox(bitmaps);
+}
+Skybox::Skybox(std::array<Bitmap, 6> bitmaps) {
     shader().bind();
     glUniform1i(shader().u("skybox"), 0);
 
@@ -19,15 +35,6 @@ Skybox::Skybox(std::string filepath) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    std::string facesCubemap[6] =
-    {
-        filepath + "/right.jpg",
-        filepath + "/left.jpg",
-        filepath + "/top.jpg",
-        filepath + "/bottom.jpg",
-        filepath + "/front.jpg",
-        filepath + "/back.jpg"
-    };
     glGenTextures(1, &cubemapTexture);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -38,31 +45,28 @@ Skybox::Skybox(std::string filepath) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     for (unsigned int i = 0; i < 6; i++)
     {
-        int width, height, nrChannels;
-        unsigned char* data = stbi_load(facesCubemap[i].c_str(), &width, &height, &nrChannels, 0);
-        if (data)
-        {
-            stbi_set_flip_vertically_on_load(false);
-            glTexImage2D
-                (
-                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                 0,
-                 GL_RGB,
-                 width,
-                 height,
-                 0,
-                 GL_RGB,
-                 GL_UNSIGNED_BYTE,
-                 data
-                );
-            stbi_image_free(data);
-        }
-        else
-        {
-            std::cout << "Failed to load texture: " << facesCubemap[i] << std::endl;
-            stbi_image_free(data);
+        auto bmp = bitmaps[i];
+        if (bmp.data) {
+            if (bmp.channelNumber == 4)
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA,
+                        bmp.width, bmp.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                        bmp.data);
+            else if (bmp.channelNumber == 3)
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA,
+                        bmp.width, bmp.height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                        bmp.data);
+            else if (bmp.channelNumber == 1)
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA,
+                        bmp.width, bmp.height, 0, GL_RED, GL_UNSIGNED_BYTE,
+                        bmp.data);
+            stbi_image_free(bmp.data);
+        } else {
+            std::cout << "Failed to load skybox\n";
         }
     }
+}
+void Skybox::decomission() {
+	glDeleteTextures(1, &cubemapTexture);
 }
 void Skybox::draw(const Camera& cam) {
     glDepthFunc(GL_LEQUAL);

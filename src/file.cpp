@@ -75,19 +75,19 @@ constexpr float txt_ratio = 1.5f;
     const glm::vec3 File::LINK_COLOR = {0.0, 0.8, 0.0};
     const std::vector<Vertex> File::VERTICES_LINK = {
         {glm::vec3(-1.0f, 0.3f,  0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(0.0f, 1.0f)}, //top-left corner
-        {glm::vec3(0.2f,  0.3f,  0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 1.0f)},
-        {glm::vec3(0.2f,  -0.3f, 0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.1f,  0.3f,  0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(-0.1f,  -0.3f, 0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
         {glm::vec3(-1.0f, -0.3f, 0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(0.0f, 0.0f)},
-        {glm::vec3(0.2f,  -1.0f, 0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
-        {glm::vec3(0.2f,  1.0f,  0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.1f,  -1.0f, 0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.1f,  1.0f,  0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
         {glm::vec3(1.0f,  0.0f,  0.01f), glm::vec3(0, 0, 1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
 
         {glm::vec3(-1.0f, 0.3f, -0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(0.0f, 1.0f)}, //top-left corner
-        {glm::vec3(0.2f,  0.3f, -0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 1.0f)},
-        {glm::vec3(0.2f,  -0.3f,-0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.1f,  0.3f, -0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 1.0f)},
+        {glm::vec3(-0.1f,  -0.3f,-0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
         {glm::vec3(-1.0f, -0.3f,-0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(0.0f, 0.0f)},
-        {glm::vec3(0.2f,  -1.0f,-0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
-        {glm::vec3(0.2f,  1.0f, -0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.1f,  -1.0f,-0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
+        {glm::vec3(-0.1f,  1.0f, -0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
         {glm::vec3(1.0f,  0.0f, -0.01f), glm::vec3(0, 0,-1), LINK_COLOR, glm::vec2(1.0f, 0.0f)},
     };
     const std::vector<GLuint> File::INDICES_LINK = {
@@ -154,17 +154,24 @@ File::File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr, fs::
 
     if(fs::is_directory(path)) {
         main_mesh = Mesh(VERTICES_DIR, INDICES_DIR, {});
+        type = FileType::Dir;
     }else if(is_contained(ext, {"png", "jpg", "jpeg", "tga", "bmp", "psd", "gif", "hdr", "pic"})){
         main_mesh = Mesh(VERTICES_IMG, INDICES_IMG, {Texture(path_str.c_str(), "diffuse", 1)});
+        type = FileType::Image;
     }else if(fs::is_symlink(path)) {
         main_mesh = Mesh(VERTICES_LINK, INDICES_LINK, {});
+        type = FileType::Link;
     }else if(is_contained(ext, {"txt", "json", "cpp", "hpp", "h", "c", "log", "cmake"})){
         auto contents = dumpStringFromFile(path);
-        auto tex = fr.generate(contents, 256, 256, 2, 16); 
+        int s = 256;
+        int w = 16;
+        contents = contents.substr(0, (s / w) * (s/w));
+        auto tex = fr.generate(contents, s, s * txt_ratio, 2, w); 
         main_mesh = Mesh(VERTICES_TXT, INDICES_TXT, {tex});
-        isFileTextFile = true;
+        type = FileType::Readable;
     }else {
         main_mesh = Mesh(VERTICES_TXT, INDICES_TXT, {});
+        type = FileType::Other;
     }
     //text
     if(path_str.size() > maxSize) {
@@ -177,6 +184,14 @@ File::File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr, fs::
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     tex.unbind();
+}
+void File::decomission() {
+    for(auto& t : main_mesh.textures) {
+        t.remove();
+    }
+    for(auto& t : text_mesh.textures) {
+        t.remove();
+    }
 }
 void File::draw(Shader& folder_shader, Shader& aura_shader, Shader& text_shader, Camera& camera) {
     if(!isActive)
@@ -198,7 +213,7 @@ void File::draw(Shader& folder_shader, Shader& aura_shader, Shader& text_shader,
 
     glm::vec4 aura_color(0, 0, 0, 0);
     if(selected) {
-        aura_color = glm::vec4(1, 1, 1, 1);
+        aura_color = glm::vec4(1, 1, 0, 1);
     }
     if(awaiting_deletion) {
         aura_color = glm::vec4(1, 0, 0, 1);
@@ -214,20 +229,29 @@ void File::draw(Shader& folder_shader, Shader& aura_shader, Shader& text_shader,
     }
 
     //if has textures, render them
-    if(main_mesh.textures.size() > 0) {
-        folder_shader.setUniform1f("useTexture", 1);
-    }else {
-        folder_shader.setUniform1f("useTexture", 0);
+    Shader* shader_used;
+    switch(type) {
+        case FileType::Readable:
+            text_shader.setUniform4f("uColorBg", glm::vec4(1, 1, 1, 1));
+            text_shader.setUniform4f("uColorFg", glm::vec4(0, 0, 0, 1));
+            text_shader.setUniformMatrix4fv("M", Mf);
+            shader_used = &text_shader;
+            main_mesh.draw(text_shader, camera);
+            break;
+        case FileType::Image:
+            folder_shader.setUniform1f("useTexture", 1);
+            shader_used = &folder_shader;
+            break;
+        case FileType::Dir:
+        case FileType::Link:
+        case FileType::Other:
+            {
+                folder_shader.setUniform1f("useTexture", 0);
+            }
+            break;
     }
-    if(isFileTextFile) {
-        text_shader.setUniform4f("uColorBg", glm::vec4(1, 1, 1, 1));
-        text_shader.setUniform4f("uColorFg", glm::vec4(0, 0, 0, 1));
-        text_shader.setUniformMatrix4fv("M", Mf);
-        main_mesh.draw(text_shader, camera);
-    }else {
-        folder_shader.setUniformMatrix4fv("M", Mf);
-        main_mesh.draw(folder_shader, camera);
-    }
+    folder_shader.setUniformMatrix4fv("M", Mf);
+    main_mesh.draw(folder_shader, camera);
 
     text_shader.setUniformMatrix4fv("M", Mt);
     text_shader.setUniform4f("uColorFg", glm::vec4(1, 1, 1, 1));

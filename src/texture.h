@@ -5,6 +5,12 @@
 #include "defs.h"
 #include <vector>
 
+struct Bitmap {
+    int width;
+    int height;
+    unsigned char* data;
+    int channelNumber;
+};
 class Texture
 {
     int m_width, m_height;
@@ -13,8 +19,9 @@ public:
 	const char* type;
 	GLuint unit;
 
+    static Bitmap loadFromFile(const char* image, bool flip_vert = true);
 	Texture(const char* image, const char* texType, GLuint slot);
-	Texture(unsigned char* bitmap, int width, int height, int numberOfChannels, const char* texType, GLuint slot);
+	Texture(Bitmap map, const char* texType, GLuint slot);
 
 	// Assigns a texture unit to a texture
 	void texUnit(Shader& shader, const char* uniform);
