@@ -34,9 +34,10 @@ int FontRenderer::getPixelWidth(std::string text, int font_height) {
     }
     return (x / font_height + 1) * font_height;
 }
-Texture FontRenderer::generate(std::string text, glm::vec3 color, int width, int height, GLuint slot, int font_height) {
+Texture FontRenderer::generate(std::string text, int width, int height, GLuint slot, int font_height, const char* type) {
     int ascent, descent, lineGap;
     if(font_height == 0){
+        std::cerr << "overloaded for: "<< text << "\n";
         font_height = height;
     }
     
@@ -56,7 +57,21 @@ Texture FontRenderer::generate(std::string text, glm::vec3 color, int width, int
         int c_x1, c_y1, c_x2, c_y2;
         stbtt_GetCodepointBitmapBox(&info, text[i], scale, scale, &c_x1, &c_y1, &c_x2, &c_y2);
 
+        if(text[i] == '\t') {
+            text[i] = ' ';
+        }
+        if(text[i] == '\n') {
+            x = 0;
+            y += font_height;
+        }
+        if(text[i] < ' ') {
+            continue;
+        }
+
         int yoff = ascent + c_y1 + y;
+        if(yoff > height) {
+            break;
+        }
 
         int byteOffset = x + roundf(lsb * scale) + (yoff * width);
         stbtt_MakeCodepointBitmap(&info, bitmap.data() + byteOffset, c_x2 - c_x1, c_y2 - c_y1, width, scale, scale, text[i]);
@@ -72,5 +87,5 @@ Texture FontRenderer::generate(std::string text, glm::vec3 color, int width, int
             x = 0;
         }
     }
-    return Texture(bitmap.data(), width, height, 1, "text", slot); 
+    return Texture(bitmap.data(), width, height, 1, type, slot); 
 }

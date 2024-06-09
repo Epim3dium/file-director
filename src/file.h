@@ -8,17 +8,25 @@
 
 struct File  {
     static std::string get_homedir(void);
-    static std::pair<Texture, float> genTextTexture(FontRenderer& fr, std::string str, glm::vec3 color) ;
+    static std::pair<Texture, float> genTextTexture(FontRenderer& fr, std::string str, int width = 0, int height = 0, int font_height = 0);
     static std::vector<Vertex> genTextVerticies(float text_ratio, float text_height = 0.3) ;
     static float textTextureRatio(FontRenderer& fr, std::string str);
 
-    static const unsigned int NUMBER_OF_VERTICES = 7;
-    static const unsigned int VERTEX_SIZE = 3;
     static const glm::vec3 FILE_COLOR;
-    static const std::vector<Vertex> VERTICES;
-    static const unsigned int TRIANGLE_COUNT = 6;
-    static const unsigned int NUMBER_OF_INDICES = 3 * TRIANGLE_COUNT;
-    static const std::vector<GLuint> INDICES;
+    static const std::vector<Vertex> VERTICES_DIR;
+    static const std::vector<GLuint> INDICES_DIR;
+
+    static const glm::vec3 TXT_COLOR;
+    static const std::vector<Vertex> VERTICES_TXT;
+    static const std::vector<GLuint> INDICES_TXT;
+
+    static const std::vector<Vertex> VERTICES_IMG;
+    static const std::vector<GLuint> INDICES_IMG;
+
+    static const glm::vec3 LINK_COLOR;
+    static const std::vector<Vertex> VERTICES_LINK;
+    static const std::vector<GLuint> INDICES_LINK;
+
     static const std::vector<GLuint> TEXT_INDICES;
     
     std::filesystem::path my_path;
@@ -27,9 +35,12 @@ struct File  {
     glm::vec3 position;
     glm::vec3 scale;
     glm::mat4 rotation = glm::mat4(1);
+    bool isFileTextFile = false;
+
     bool isActive = true;
-    bool awaiting_deletion = true;
+    bool awaiting_deletion = false;
+    bool selected = false;
     
     File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr, std::filesystem::path path);
-    void draw(Shader& folder_shader, Shader& area_shader, Shader& text_shader, Camera& camera, glm::vec4 aura_color = glm::vec4(0, 0, 0, 0));
+    void draw(Shader& folder_shader, Shader& area_shader, Shader& text_shader, Camera& camera);
 };

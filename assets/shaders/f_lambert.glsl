@@ -9,6 +9,8 @@ struct Light {
     vec3 specular;
     vec3 color;
 };
+uniform float useTexture = 0;
+uniform sampler2D diffuse0;
 uniform Light light; 
 
 out vec4 pixelColor; //Output variable of the fragment shader. (Almost) final pixel color.
@@ -17,6 +19,7 @@ in vec4 fColor;
 in vec4 fLight;//eye space
 in vec4 fNormal; //eye space
 in vec4 fViewer;//eye space
+in vec2 fTex;
 
 void main(void) {
 	//Normalized, interpolated vectors
@@ -28,6 +31,9 @@ void main(void) {
 
 	//Surface parameters
 	vec4 kd = fColor;
+    if(useTexture == 1) {
+        kd = texture(diffuse0, fTex);
+    }
 	vec4 ks = vec4(1,1,1,1);
 
 	//Lighting model computation

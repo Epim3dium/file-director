@@ -32,6 +32,7 @@ out vec4 fColor;
 out vec4 fLight;//eye space
 out vec4 fNormal; //eye space
 out vec4 fViewer;//eye space
+out vec2 fTex;//eye space
 
 void main(void) {
     fLight = normalize(V * light.position - V * M * vec4(aPos, 1)); //vector towards the light in eye space
@@ -45,4 +46,5 @@ void main(void) {
     // vec4 n=normalize(V*G*normal);
     // float nl=clamp(dot(n,lightDir),0,1);
     fColor=vec4(aColor, 1);
+    fTex = aTex;
 }

@@ -88,10 +88,13 @@ struct Arena {
                     }
                     f.awaiting_deletion = true;
                 }
+
+                f.selected = true;
             }else {
+                f.selected = false;
                 f.awaiting_deletion = false;
             }
-            f.draw(shaders.spLambert, shaders.spDefault, shaders.spText, camera, aura_color);
+            f.draw(shaders.spLambert, shaders.spDefault, shaders.spText, camera);
             f.rotation = glm::rotate(f.rotation, 0.01f, vec3(0, 1, 0));
         }
 
