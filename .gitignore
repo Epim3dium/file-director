@@ -2,7 +2,7 @@
 build/
 cgv_st_04_lin/
 cmake-build-debug/
-lib/
+# lib/
 
 # Editors & IDEs
 .idea/
