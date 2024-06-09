@@ -161,7 +161,7 @@ File::File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr, fs::
     }else if(fs::is_symlink(path)) {
         main_mesh = Mesh(VERTICES_LINK, INDICES_LINK, {});
         type = FileType::Link;
-    }else if(is_contained(ext, {"txt", "json", "cpp", "hpp", "h", "c", "log", "cmake"})){
+    }else if(is_contained(ext, {"txt", "json", "glsl", "cpp", "hpp", "h", "c", "log", "cmake"})){
         auto contents = dumpStringFromFile(path);
         int s = 256;
         int w = 16;

@@ -77,6 +77,7 @@ struct Arena {
                 delete inFileSkybox;
                 isInFile = false;
                 camera.position = glm::vec3(0, 1, 0);
+                lastClickedMinus = true;
             }
             return;
         }
@@ -139,8 +140,15 @@ struct Arena {
                     inFileSkybox = new Skybox(bitmaps);
                 }else if(closest_file->type == FileType::Image) {
                     std::array<Bitmap, 6> bitmaps;
-                    for(int i = 0; i < 6; i++) {
-                        bitmaps[i] = Texture::loadFromFile(closest_path.string().c_str());
+                    bitmaps[0] = Texture::loadFromFile(closest_path.string().c_str());
+                    for(int i = 1; i < 6; i++) {
+                        bitmaps[i] = bitmaps[i - 1];
+                        int bufferSize = bitmaps[i].width * bitmaps[i].height * bitmaps[i].channelNumber;
+                        bitmaps[i].data = new unsigned char[bufferSize]{0};
+                        memcpy(bitmaps[i].data, bitmaps[i - 1].data, bufferSize);
+                    }
+                    if(bitmaps.front().width != bitmaps.front().height ) {
+                        std::cerr << "Possible problem!\n";
                     }
                     isInFile = true;
         
