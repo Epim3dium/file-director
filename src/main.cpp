@@ -1,8 +1,7 @@
 #include <filesystem>
 #include "app.hpp"
+#include "arena.hpp"
 #include "defs.h"
-#include "file.h"
-#include "grass.hpp"
 #include "shader.h"
 #include "camera.h"
 #include "skybox.h"
@@ -29,21 +28,17 @@ public:
     Shader spText;
     Shader spGrass;
     
-    FontRenderer font_renderer;
-
-    File file;
-    Grass grass_cutout;
-
     Texture default_texture;
     std::vector<Texture> column_textures;
     std::vector<Texture> marble_textures;
 
-    Mesh marble_plane;
-    Mesh gun;
     Mesh column;
     
+    FontRenderer font_renderer;
+
+    
     Camera camera;
-    glm::mat4 Mk;
+    Arena arena;
 #define SUN_DIR (-glm::normalize(glm::vec3(3, 4, -10.2)))
 #define SUN_POSITION (-SUN_DIR * 100000.f)
 
@@ -88,34 +83,10 @@ public:
         return true;
     }
     void update() override final  {
-        time += 1.0/60.0;
-        
         camera.processInput(window);
         camera.update(0.1f, 200.0f, glm::radians(45.f));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-		Mk = glm::rotate(Mk, glm::radians(0.3f), glm::vec3(0.0f, 1.0f, 0.0f));
-        file.draw(spLambert, spText, camera);
-
-
-        spBlinnPhong.setUniform3f("light.ambient", glm::vec3(0.5, 0.5, 0.5));
-        spBlinnPhong.setUniformMatrix4fv("M", glm::translate(glm::vec3{0, 0, 0}));
-        marble_plane.draw(spBlinnPhong, camera);
-        spBlinnPhong.setUniform3f("light.ambient", glm::vec3(0.2, 0.2, 0.2));
-
-        for(float i = 0; i < arena_sides; i++) {
-            float angle = 2.f * M_PI / arena_sides * i;
-            glm::vec3 dir = {cos(angle), 0, sin(angle)};
-            glm::mat4 M(1.f);
-            M = glm::translate(dir * arena_size);
-            M = glm::rotate(M, (float)M_PI * 0.5f - angle, {0, 1, 0});
-            M = glm::scale(M, vec3(0.03, 0.03, 0.03));
-            spBlinnPhong.setUniformMatrix4fv("M", M);
-            column.draw(spBlinnPhong, camera);
-        }
-
-        grass_cutout.draw(camera, spGrass, time);
-        
+        arena.draw(window, camera, {spLambert, spText, spBlinnPhong, spGrass, spDefault});
         
         skybox.draw(camera);
     }
@@ -124,8 +95,6 @@ public:
     Demo(Demo &&) = default;
     Demo(int w, int h)
         : font_renderer(FD_ASSET_DIR "/monospace.ttf"),
-          file(glm::vec3(0, 1, 5), glm::vec3(0.5, 0.5, 0.5), glm::mat4(1),
-               font_renderer, std::filesystem::temp_directory_path()),
           skybox(FD_TEXTURE_DIR "/skybox"),
 
           spBlinnPhong(FD_SHADER_DIR "/v_blinn_phong.glsl",
@@ -139,8 +108,6 @@ public:
           spGrass(FD_SHADER_DIR "/v_grass.glsl", FD_SHADER_DIR "/f_grass.glsl"),
           spFile(spLambert),
 
-          gun(FD_MODEL_DIR "/raygun.obj",
-              {Texture(FD_TEXTURE_DIR "/raygun_diffuse.jpg", "diffuse", 1)}),
           default_texture(FD_TEXTURE_DIR"/default.png", "none", 0),
           column_textures(
               {Texture(FD_TEXTURE_DIR "/column/diffuse.jpg", "diffuse", 1),
@@ -156,10 +123,9 @@ public:
                Texture(FD_TEXTURE_DIR "/marble/roughness.jpeg", "rough", 5),
                Texture(FD_TEXTURE_DIR "/marble/height.jpeg", "height", 6)}),
           column(FD_MODEL_DIR "/column_01.obj", column_textures),
-          grass_cutout(FD_TEXTURE_DIR "/grass.jpg", FD_TEXTURE_DIR "/grass_detail.png", FD_TEXTURE_DIR "/perlin_single.png", Mesh::UniformConvexCutout(100.f, arena_size, arena_sides)), 
-          marble_plane(Mesh::UniformConvex(arena_size, arena_sides, marble_textures)),
 
           camera(WIDTH, HEIGHT, glm::vec3(0, 1, -5), glm::vec3(0, 1, 1)),
+          arena(fs::current_path(), column_textures, column, marble_textures, font_renderer),
           App(w, h) {}
 };
 

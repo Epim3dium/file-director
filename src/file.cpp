@@ -11,7 +11,7 @@
         return homedir;
     }
     std::pair<Texture, float> File::genTextTexture(FontRenderer& fr, std::string str, glm::vec3 color) {
-        constexpr float SCALE = 2.f;
+        constexpr float SCALE = 1.f;
         constexpr float FONT_HEIGHT = 32.f * SCALE;
         constexpr float FONT_WIDTH = 32.f * SCALE;
 
@@ -67,33 +67,50 @@
         0, 1, 2,
         2, 3, 0
     };
-File::File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr,
-     std::filesystem::path path_)
+constexpr int maxSize = 30;
+File::File(glm::vec3 pos, glm::vec3 scale, glm::mat4 rot, FontRenderer &fr, std::filesystem::path path)
     // : text_mesh({}, {}, {}), main_mesh(VERTICES, INDICES, {}), myPath(path) 
-    : position(pos), scale(scale), rotation(rot), text_mesh({}, {}, {}), main_mesh(VERTICES, INDICES, {}), path(path_) 
+    : my_path(path), position(pos), scale(scale), rotation(rot), text_mesh({}, {}, {}), main_mesh(VERTICES, INDICES, {}) 
 {
-    auto home = get_homedir();
-    auto curpath = path.string();
-    if(curpath.find(home) != std::string::npos) {
-        curpath.erase(curpath.find(home), home.size());
+    std::string path_str = path.string();
+    if(path_str.size() > maxSize) {
+        path_str = "..." + path_str.substr(path_str.size() - maxSize - 3);
     }
-    auto [tex, ratio] = genTextTexture(fr, curpath, vec3(1, 1, 1));
+    auto [tex, ratio] = genTextTexture(fr, path_str, vec3(1, 1, 1));
     auto verts = genTextVerticies(ratio);
     text_mesh = Mesh(verts, TEXT_INDICES, {tex});
 }
-void File::draw(Shader& folder_shader, Shader& text_shader, Camera& camera) {
+void File::draw(Shader& folder_shader, Shader& aura_shader, Shader& text_shader, Camera& camera, glm::vec4 aura_color) {
+    if(!isActive)
+        return;
     glm::mat4 Mf = glm::mat4(1);
     
     Mf = glm::translate(Mf, position);
+    auto Mt = Mf;
+    Mt = glm::scale(Mt, scale);
+    Mt = glm::scale(Mt, glm::vec3(1,-1,1));
+
     Mf = Mf * rotation;
     Mf = glm::scale(Mf, scale);
     
-    auto Mt = Mf;
-    Mt = glm::scale(Mt, glm::vec3(1,-1,1));
     
     auto proj = glm::vec3(camera.position.x, position.y, camera.position.z);
     Mt = Mt * glm::lookAt(glm::vec3(0, 0, 0), proj - position, -vec3(0, 1, 0));
     
+    auto MfA = glm::scale(Mf, vec3(1.2, 1.2, 1.2)); 
+
+    if(awaiting_deletion) {
+        aura_color = glm::vec4(1, 0, 0, 1);
+    }
+    if(aura_color != glm::vec4(0, 0, 0, 0)) {
+        aura_shader.setUniformMatrix4fv("M", MfA);
+        aura_shader.setUniform1f("backward", 0.1f);
+        aura_shader.setUniform4f("uColor", aura_color);
+        main_mesh.draw(aura_shader, camera);
+        aura_shader.setUniform1f("backward", 0.f);
+        aura_shader.setUniform4f("uColor", glm::vec4(0, 0, 0, 0));
+    }
+
     folder_shader.setUniformMatrix4fv("M", Mf);
     main_mesh.draw(folder_shader, camera);
 

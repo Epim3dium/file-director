@@ -10,6 +10,8 @@ struct Light {
     vec3 color;
 };
 uniform Light light; 
+
+//for files
 //Uniform variables
 uniform mat4 P;
 uniform mat4 V;

@@ -1,4 +1,5 @@
 #include "skybox.h"
+#include "glm/gtc/type_ptr.hpp"
 Skybox::Skybox(std::string filepath) {
     shader().bind();
     glUniform1i(shader().u("skybox"), 0);

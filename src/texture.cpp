@@ -11,6 +11,7 @@ Texture::Texture(unsigned char* bitmap, int widthImg, int heightImg, int numColC
 
 	glGenTextures(1, &ID);
 	glActiveTexture(GL_TEXTURE0 + slot);
+
 	unit = slot;
 	glBindTexture(GL_TEXTURE_2D, ID);
 

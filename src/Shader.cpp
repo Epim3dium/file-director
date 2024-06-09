@@ -1,9 +1,8 @@
 #include <iostream>
 #include <string>
 #include <glad/glad.h>
-#include <fstream>
-#include <sstream>
 #include "shader.h"
+#include "glm/gtc/type_ptr.hpp"
 #include <vector>
 
 

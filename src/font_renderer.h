@@ -9,6 +9,7 @@
 class FontRenderer
 {
     stbtt_fontinfo info;
+    std::string fontBuffer;
 public:
 
 	FontRenderer(const char* font);

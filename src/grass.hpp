@@ -3,7 +3,7 @@
 #include "shader.h"
 struct Grass {
     glm::vec2 noise_offset;
-    const int maxLayer = 100;
+    const int maxLayer = 50;
     glm::vec3 position = glm::vec3(0, 0, 0);
     glm::vec3 scale = glm::vec3(1, 1, 1);
     glm::mat4 rotation = glm::mat4(1);

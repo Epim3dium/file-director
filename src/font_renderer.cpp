@@ -5,7 +5,7 @@
 
 FontRenderer::FontRenderer(const char* font) 
 {
-    std::string fontBuffer = dumpStringFromFile(font);
+    fontBuffer = dumpStringFromFile(font);
     if (!stbtt_InitFont(&info, (unsigned char*)fontBuffer.data(), 0))
     {
         printf("failed\n");
@@ -72,11 +72,5 @@ Texture FontRenderer::generate(std::string text, glm::vec3 color, int width, int
             x = 0;
         }
     }
-    std::vector<unsigned char> bitmap_colored(width * height*3);
-    for(int i = 0; i < bitmap.size(); i++) {
-        bitmap_colored[i*3 + 0] = bitmap[i] * color.r;
-        bitmap_colored[i*3 + 1] = bitmap[i] * color.g;
-        bitmap_colored[i*3 + 2] = bitmap[i] * color.b;
-    }
-    return Texture(bitmap_colored.data(), width, height, 3, "text", slot); 
+    return Texture(bitmap.data(), width, height, 1, "text", slot); 
 }

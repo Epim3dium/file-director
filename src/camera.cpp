@@ -1,5 +1,5 @@
 #include "camera.h"
-#include <iostream>
+#include "glm/gtc/type_ptr.hpp"
 
 
 void Camera::update(float nearClip, float farClip, float fov) {
